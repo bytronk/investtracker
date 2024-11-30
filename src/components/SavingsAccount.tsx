@@ -160,7 +160,7 @@ export const SavingsAccount: React.FC = () => {
               })}
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Cuenta Remunerada</h3>
+            <h3 className="text-lg font-semibold">Disponible</h3>
             <PiggyBank className="h-8 w-8 bg-blue-500 text-white p-1.5 rounded-full" />
           </div>
           <p className="text-2xl font-bold">
@@ -178,7 +178,7 @@ export const SavingsAccount: React.FC = () => {
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
         }`}
       >
-        <h2 className="text-xl font-semibold mb-4">Movimientos</h2>
+        <h2 className="text-xl font-semibold mb-4">Transacciones</h2>
         <div className="space-y-6">
           {Object.entries(groupedByMonth).map(([monthKey, transactions]) => (
             <div key={monthKey}>
@@ -271,7 +271,7 @@ export const SavingsAccount: React.FC = () => {
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"
         }`}
       >
-        <h2 className="text-xl font-semibold mb-4">Registrar Movimiento</h2>
+        <h2 className="text-xl font-semibold mb-4">Registrar transacción</h2>
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
@@ -298,7 +298,7 @@ export const SavingsAccount: React.FC = () => {
             onChange={(e) =>
               setFormData({ ...formData, amount: e.target.value })
             }
-            className={`p-2 border rounded-md ${
+            className={`p-2 border rounded-md appearance-none ${
               isDarkMode
                 ? "bg-gray-800 text-gray-100 border-gray-700"
                 : "bg-gray-100 text-gray-900 border-gray-300"
