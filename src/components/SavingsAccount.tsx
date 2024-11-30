@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   PiggyBank,
   ArrowUpCircle,
@@ -17,8 +17,18 @@ export const SavingsAccount: React.FC = () => {
   const [formData, setFormData] = useState({
     type: "ingreso",
     amount: "",
-    date: new Date().toISOString().split("T")[0], // Fecha actual por defecto
+    date: new Date().toISOString().split("T")[0],
   });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    const checkTouchDevice = () => {
+      setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
+    };
+    checkTouchDevice();
+    window.addEventListener("resize", checkTouchDevice);
+    return () => window.removeEventListener("resize", checkTouchDevice);
+  }, []);
 
   const getTransactionIcon = (type: Transaction["type"]) => {
     switch (type) {
@@ -37,11 +47,10 @@ export const SavingsAccount: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     addTransaction({
       type: formData.type as Transaction["type"],
       amount: parseFloat(formData.amount),
-      date: formData.date, // Asignar la fecha seleccionada
+      date: formData.date,
     });
 
     setFormData({
@@ -57,22 +66,46 @@ export const SavingsAccount: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cuenta Remunerada */}
-      <div
-        className={`rounded-lg shadow-md p-6 ${
-          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
-        }`}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Cuenta Remunerada</h2>
-          <PiggyBank className="h-8 w-8 text-blue-500" />
+      {/* Tarjetas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
+            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+          } ${!isTouchDevice ? "hover:scale-105" : ""}`}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Mi Patrimonio</h3>
+            <PiggyBank className="h-8 w-8 bg-blue-500 text-white p-1.5 rounded-full" />
+          </div>
+          <p className="text-2xl font-bold">
+            {new Intl.NumberFormat("es-ES", {
+              style: "currency",
+              currency: "EUR",
+            }).format(
+              portfolio.savingsAccount +
+                portfolio.assets.reduce(
+                  (acc, asset) => acc + asset.totalInvested,
+                  0
+                )
+            )}
+          </p>
         </div>
-        <p className="text-3xl font-bold">
-          {new Intl.NumberFormat("es-ES", {
-            style: "currency",
-            currency: "EUR",
-          }).format(portfolio.savingsAccount)}
-        </p>
+        <div
+          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
+            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+          } ${!isTouchDevice ? "hover:scale-105" : ""}`}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Cuenta Remunerada</h3>
+            <PiggyBank className="h-8 w-8 bg-blue-500 text-white p-1.5 rounded-full" />
+          </div>
+          <p className="text-2xl font-bold">
+            {new Intl.NumberFormat("es-ES", {
+              style: "currency",
+              currency: "EUR",
+            }).format(portfolio.savingsAccount)}
+          </p>
+        </div>
       </div>
 
       {/* Lista de Movimientos */}
@@ -82,19 +115,20 @@ export const SavingsAccount: React.FC = () => {
         }`}
       >
         <h2 className="text-xl font-semibold mb-4">Movimientos</h2>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {portfolio.transactions.map((transaction) => {
             const Icon = getTransactionIcon(transaction.type);
+
             return (
               <div
                 key={transaction.id}
-                className={`flex items-center justify-between p-4 rounded-lg ${
-                  isDarkMode ? "bg-gray-900" : "bg-gray-50"
+                className={`flex items-center justify-between p-2 px-2.5 border rounded-lg ${
+                  isDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-100"
                 }`}
               >
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
                   <Icon
-                    className={`h-8 w-8 p-1.5 rounded-full ${
+                    className={`h-7 w-7 p-1 rounded-full ${
                       ["ingreso", "interes", "dividendo"].includes(
                         transaction.type
                       )
@@ -102,7 +136,7 @@ export const SavingsAccount: React.FC = () => {
                         : "bg-red-500 text-white"
                     }`}
                   />
-                  <div>
+                  <div className="space-y-1">
                     <p className="font-medium capitalize">{transaction.type}</p>
                     <p
                       className={`text-sm ${
@@ -135,10 +169,10 @@ export const SavingsAccount: React.FC = () => {
                   </p>
                   <button
                     onClick={() => handleDelete(transaction.id)}
-                    className="text-blue-500 hover:text-blue-700 transition"
+                    className="text-blue-500 hover:text-blue-700"
                     aria-label="Eliminar movimiento"
                   >
-                    <Trash className="h-4 w-4" />
+                    <Trash className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -150,86 +184,63 @@ export const SavingsAccount: React.FC = () => {
       {/* Formulario de Registro */}
       <div
         className={`rounded-lg shadow-md p-6 ${
-          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"
         }`}
       >
         <h2 className="text-xl font-semibold mb-4">Registrar Movimiento</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Tipo de Movimiento
-            </label>
-            <select
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
-              className={`w-full p-2 border rounded-md ${
-                isDarkMode
-                  ? "bg-gray-700 text-gray-100 border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
-            >
-              <option value="ingreso">Ingreso</option>
-              <option value="interes">Interés</option>
-              <option value="dividendo">Dividendo</option>
-              <option value="retiro">Retiro</option>
-            </select>
-          </div>
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Importe (EUR)
-            </label>
-            <input
-              type="number"
-              value={formData.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
-              }
-              className={`w-full p-2 border rounded-md ${
-                isDarkMode
-                  ? "bg-gray-700 text-gray-100 border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
-              required
-              step="any"
-            />
-          </div>
-          <div>
-            <label
-              className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Fecha
-            </label>
-            <input
-              type="date"
-              value={formData.date}
-              onChange={(e) =>
-                setFormData({ ...formData, date: e.target.value })
-              }
-              className={`w-full p-2 border rounded-md ${
-                isDarkMode
-                  ? "bg-gray-700 text-gray-100 border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
-              required
-            />
-          </div>
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          <select
+            value={formData.type}
+            onChange={(e) =>
+              setFormData({ ...formData, type: e.target.value })
+            }
+            className={`p-2 border rounded-md appearance-none ${
+              isDarkMode
+                ? "bg-gray-800 text-gray-100 border-gray-700"
+                : "bg-gray-100 text-gray-900 border-gray-300"
+            } text-center`}
+          >
+            <option value="ingreso">Ingreso</option>
+            <option value="interes">Interés</option>
+            <option value="dividendo">Dividendo</option>
+            <option value="retiro">Retiro</option>
+          </select>
+          <input
+            type="number"
+            value={formData.amount}
+            onChange={(e) =>
+              setFormData({ ...formData, amount: e.target.value })
+            }
+            className={`p-2 border rounded-md ${
+              isDarkMode
+                ? "bg-gray-800 text-gray-100 border-gray-700"
+                : "bg-gray-100 text-gray-900 border-gray-300"
+            } text-center`}
+            placeholder="Importe (EUR)"
+            required
+            step="any"
+          />
+          <input
+            type="date"
+            value={formData.date}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+            className={`p-2 border rounded-md appearance-none ${
+              isDarkMode
+                ? "bg-gray-800 text-gray-100 border-gray-700"
+                : "bg-gray-100 text-gray-900 border-gray-300"
+            } text-center`}
+            required
+          />
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 transition duration-200"
+            className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 transition duration-200"
           >
-            Registrar Movimiento
+            Registrar
           </button>
         </form>
       </div>

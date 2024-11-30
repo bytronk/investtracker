@@ -18,3 +18,38 @@ body {
 .dark body {
   background-color: #1a202c; /* Fondo oscuro */
 }
+
+/* Personalización del ícono del calendario */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color: inherit; /* Hereda el color del texto */
+  filter: invert(50%) sepia(1) saturate(500%) hue-rotate(190deg); /* Ajusta el color */
+  opacity: 1; /* Asegura visibilidad */
+  margin-left: -20px;
+}
+
+/* Eliminación de la flecha del select */
+select {
+  appearance: none; /* Quita la flecha por defecto */
+  -moz-appearance: none; /* Firefox */
+  -webkit-appearance: none; /* Safari/Chrome */
+  text-align-last: center; /* Asegura que el texto esté centrado en pantallas móviles */
+  text-align: center; /* Asegura centrado en navegadores estándar */
+  padding-right: 0; /* Elimina espacio para la flecha (ya eliminada) */
+}
+
+/* iOS específico para centrar opciones */
+@supports (-webkit-appearance: none) {
+  select {
+    padding-left: 50%; /* Desplaza el texto hacia el centro */
+  }
+}
+
+/* Solución para select de Android */
+select option {
+  text-align: center;
+}
+
+/* Asegura que los inputs estén alineados verticalmente */
+input, select {
+  text-align: center; /* Centra el texto horizontalmente */
+}

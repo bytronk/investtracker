@@ -59,7 +59,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
       {/* Botón flotante para cambiar de tema */}
       <button
         onClick={toggleTheme}
-        className="fixed bottom-4 right-4 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 dark:bg-gray-700 dark:hover:bg-gray-600 transition transform hover:scale-110 active:scale-90"
+        className="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 dark:bg-gray-700 dark:hover:bg-gray-600 transition transform hover:scale-110 active:scale-90"
       >
         {isDarkMode ? (
           <Sun className="h-5 w-5" />

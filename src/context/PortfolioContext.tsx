@@ -7,7 +7,8 @@ interface PortfolioContextType {
   addAsset: (asset: Omit<Asset, "id">) => void;
   updateAsset: (assetId: string, quantity: number, amount: number) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
-  deleteTransaction: (transactionId: string) => void;
+  deleteTransaction: (id: string) => void;
+  updateTransaction: (transaction: Transaction) => void; // Añadido aquí
 }
 
 const PortfolioContext = createContext<PortfolioContextType | null>(null);
@@ -87,35 +88,78 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     savePortfolio(newPortfolio);
   };
 
-  const deleteTransaction = (transactionId: string) => {
+  const deleteTransaction = (id: string) => {
     const transactionToDelete = portfolio.transactions.find(
-      (t) => t.id === transactionId
+      (transaction) => transaction.id === id
+    );
+    if (!transactionToDelete) return;
+
+    let newSavingsAccount = portfolio.savingsAccount;
+    if (
+      ["ingreso", "interes", "dividendo", "venta"].includes(
+        transactionToDelete.type
+      )
+    ) {
+      newSavingsAccount -= transactionToDelete.amount;
+    } else if (["retiro", "compra"].includes(transactionToDelete.type)) {
+      newSavingsAccount += transactionToDelete.amount;
+    }
+
+    const updatedTransactions = portfolio.transactions.filter(
+      (transaction) => transaction.id !== id
     );
 
-    if (transactionToDelete) {
-      let newSavingsAccount = portfolio.savingsAccount;
+    const newPortfolio = {
+      ...portfolio,
+      transactions: updatedTransactions,
+      savingsAccount: newSavingsAccount,
+    };
+    savePortfolio(newPortfolio);
+  };
 
-      if (
-        ["ingreso", "interes", "dividendo", "venta"].includes(
-          transactionToDelete.type
-        )
-      ) {
-        newSavingsAccount -= transactionToDelete.amount;
-      } else if (["retiro", "compra"].includes(transactionToDelete.type)) {
-        newSavingsAccount += transactionToDelete.amount;
-      }
+  const updateTransaction = (updatedTransaction: Transaction) => {
+    const previousTransaction = portfolio.transactions.find(
+      (transaction) => transaction.id === updatedTransaction.id
+    );
 
-      const newTransactions = portfolio.transactions.filter(
-        (t) => t.id !== transactionId
-      );
+    if (!previousTransaction) return;
 
-      const newPortfolio = {
-        ...portfolio,
-        transactions: newTransactions,
-        savingsAccount: newSavingsAccount,
-      };
-      savePortfolio(newPortfolio);
+    let newSavingsAccount = portfolio.savingsAccount;
+
+    // Revert previous transaction
+    if (
+      ["ingreso", "interes", "dividendo", "venta"].includes(
+        previousTransaction.type
+      )
+    ) {
+      newSavingsAccount -= previousTransaction.amount;
+    } else if (["retiro", "compra"].includes(previousTransaction.type)) {
+      newSavingsAccount += previousTransaction.amount;
     }
+
+    // Apply updated transaction
+    if (
+      ["ingreso", "interes", "dividendo", "venta"].includes(
+        updatedTransaction.type
+      )
+    ) {
+      newSavingsAccount += updatedTransaction.amount;
+    } else if (["retiro", "compra"].includes(updatedTransaction.type)) {
+      newSavingsAccount -= updatedTransaction.amount;
+    }
+
+    const updatedTransactions = portfolio.transactions.map((transaction) =>
+      transaction.id === updatedTransaction.id
+        ? updatedTransaction
+        : transaction
+    );
+
+    const newPortfolio = {
+      ...portfolio,
+      transactions: updatedTransactions,
+      savingsAccount: newSavingsAccount,
+    };
+    savePortfolio(newPortfolio);
   };
 
   return (
@@ -126,6 +170,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
         updateAsset,
         addTransaction,
         deleteTransaction,
+        updateTransaction, // Incluido aquí
       }}
     >
       {children}
