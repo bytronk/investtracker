@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   TrendingUp,
   PiggyBank,
@@ -7,6 +7,7 @@ import {
   Percent,
   DollarSign,
   Trash,
+  ChevronDown,
 } from "lucide-react";
 import { usePortfolio } from "../context/PortfolioContext";
 import { useTheme } from "../context/ThemeContext";
@@ -22,6 +23,9 @@ export const SavingsAccount: React.FC = () => {
   });
   const [activeCard, setActiveCard] = useState<string | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const transactionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const checkTouchDevice = () => {
@@ -31,6 +35,17 @@ export const SavingsAccount: React.FC = () => {
     window.addEventListener("resize", checkTouchDevice);
     return () => window.removeEventListener("resize", checkTouchDevice);
   }, []);
+
+  const handleToggleTransactions = () => {
+    setShowAllTransactions((prev) => !prev);
+
+    if (!showAllTransactions && transactionsRef.current) {
+      transactionsRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
 
   const getTransactionIcon = (type: Transaction["type"]) => {
     switch (type) {
@@ -60,15 +75,31 @@ export const SavingsAccount: React.FC = () => {
       amount: "",
       date: new Date().toISOString().split("T")[0],
     });
+
+    // Mostrar la alerta
+    setShowAlert(true);
+    // Ocultar la alerta después de 2 segundos
+    setTimeout(() => setShowAlert(false), 3000);
   };
 
   const handleDelete = (id: string) => {
-    deleteTransaction(id);
+    const confirmDelete = window.confirm("¿Eliminar transacción?");
+    if (confirmDelete) {
+      deleteTransaction(id);
+    }
   };
 
   const sortedTransactions = [...portfolio.transactions].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const totalInterest = portfolio.transactions
+    .filter((transaction) => transaction.type === "interes")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+  const totalDividends = portfolio.transactions
+    .filter((transaction) => transaction.type === "dividendo")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
 
   const groupedByMonth = sortedTransactions.reduce<Record<string, Transaction[]>>(
     (groups, transaction) => {
@@ -113,7 +144,7 @@ export const SavingsAccount: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Tarjetas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
           className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
             isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
@@ -170,96 +201,167 @@ export const SavingsAccount: React.FC = () => {
             }).format(portfolio.savingsAccount)}
           </p>
         </div>
+        <div
+          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
+            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+          } ${activeCard === "Intereses" ? "scale-105" : ""}`}
+          {...(isTouchDevice
+            ? {
+                onTouchStart: () => setActiveCard("Intereses"),
+                onTouchEnd: () => setActiveCard(null),
+              }
+            : {
+                onMouseEnter: () => setActiveCard("Intereses"),
+                onMouseLeave: () => setActiveCard(null),
+              })}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Intereses</h3>
+            <Percent className="h-8 w-8 bg-green-500 text-white p-1.5 rounded-full" />
+          </div>
+          <p className="text-2xl font-bold">
+            {new Intl.NumberFormat("es-ES", {
+              style: "currency",
+              currency: "EUR",
+            }).format(totalInterest)}
+          </p>
+        </div>
+        <div
+          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
+            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+          } ${activeCard === "Dividendos" ? "scale-105" : ""}`}
+          {...(isTouchDevice
+            ? {
+                onTouchStart: () => setActiveCard("Dividendos"),
+                onTouchEnd: () => setActiveCard(null),
+              }
+            : {
+                onMouseEnter: () => setActiveCard("Dividendos"),
+                onMouseLeave: () => setActiveCard(null),
+              })}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Dividendos</h3>
+            <DollarSign className="h-8 w-8 bg-yellow-500 text-white p-1.5 rounded-full" />
+          </div>
+          <p className="text-2xl font-bold">
+            {new Intl.NumberFormat("es-ES", {
+              style: "currency",
+              currency: "EUR",
+            }).format(totalDividends)}
+          </p>
+        </div>
       </div>
 
       {/* Lista de Movimientos */}
       <div
+        ref={transactionsRef}
         className={`rounded-lg shadow-md p-6 ${
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
         }`}
       >
-        <h2 className="text-xl font-semibold mb-4">Transacciones</h2>
-        <div className="space-y-6">
+        <button
+          onClick={handleToggleTransactions}
+          className="text-xl font-semibold flex items-center justify-between w-full"
+        >
+          Transacciones{" "}
+          <ChevronDown
+            className={`h-6 w-6 text-blue-500 transform transition-transform ${
+              showAllTransactions ? "rotate-180" : "rotate-0"
+            }`}
+          />
+        </button>
+        <div
+          className={`overflow-hidden transition-all duration-1000 ease-in-out ${
+            showAllTransactions ? "max-h-[3000px]" : "max-h-96"
+          }`}
+        >
           {Object.entries(groupedByMonth).map(([monthKey, transactions]) => (
             <div key={monthKey}>
-              <h3
-                className={`text-lg font-semibold mb-2 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                {monthKey === currentMonthKey
-                  ? "Este mes"
-                  : monthKey === previousMonthKey
-                  ? "El mes pasado"
-                  : monthKey}
-              </h3>
-              <div className="space-y-3">
-                {transactions.map((transaction) => {
-                  const Icon = getTransactionIcon(transaction.type);
-                  return (
-                    <div
-                      key={transaction.id}
-                      className={`flex items-center justify-between p-2 px-2.5 border rounded-lg ${
-                        isDarkMode
-                          ? "bg-gray-800 border-gray-700"
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Icon
-                          className={`h-7 w-7 p-1 rounded-full ${
-                            ["ingreso", "interes", "dividendo"].includes(
-                              transaction.type
-                            )
-                              ? "bg-green-500 text-white"
-                              : "bg-red-500 text-white"
+              {showAllTransactions || monthKey === currentMonthKey ? (
+                <>
+                  <h3
+                    className={`text-lg font-semibold mt-6 mb-2 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    {monthKey === currentMonthKey
+                      ? "Este mes"
+                      : monthKey === previousMonthKey
+                      ? "El mes pasado"
+                      : monthKey}
+                  </h3>
+                  <div className="space-y-3">
+                    {transactions.map((transaction) => {
+                      const Icon = getTransactionIcon(transaction.type);
+                      return (
+                        <div
+                          key={transaction.id}
+                          className={`flex items-center justify-between p-2 px-2.5 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-800 border-gray-700"
+                              : "bg-gray-100"
                           }`}
-                        />
-                        <div className="space-y-1">
-                          <p className="font-medium capitalize">
-                            {transaction.type}
-                          </p>
-                          <p
-                            className={`text-sm ${
-                              isDarkMode ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            {formatDate(transaction.date)}
-                          </p>
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Icon
+                              className={`h-7 w-7 p-1 rounded-full ${
+                                ["ingreso", "interes", "dividendo"].includes(
+                                  transaction.type
+                                )
+                                  ? "bg-green-500 text-white"
+                                  : "bg-red-500 text-white"
+                              }`}
+                            />
+                            <div className="space-y-1">
+                              <p className="font-medium capitalize">
+                                {transaction.type}
+                              </p>
+                              <p
+                                className={`text-sm ${
+                                  isDarkMode
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {formatDate(transaction.date)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <p
+                              className={`font-medium ${
+                                ["ingreso", "interes", "dividendo"].includes(
+                                  transaction.type
+                                )
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {["ingreso", "interes", "dividendo"].includes(
+                                transaction.type
+                              )
+                                ? "+"
+                                : "-"}
+                              {new Intl.NumberFormat("es-ES", {
+                                style: "currency",
+                                currency: "EUR",
+                              }).format(transaction.amount)}
+                            </p>
+                            <button
+                              onClick={() => handleDelete(transaction.id)}
+                              className="text-blue-500 hover:text-blue-700"
+                              aria-label="Eliminar movimiento"
+                            >
+                              <Trash className="h-5 w-5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <p
-                          className={`font-medium ${
-                            ["ingreso", "interes", "dividendo"].includes(
-                              transaction.type
-                            )
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {["ingreso", "interes", "dividendo"].includes(
-                            transaction.type
-                          )
-                            ? "+"
-                            : "-"}
-                          {new Intl.NumberFormat("es-ES", {
-                            style: "currency",
-                            currency: "EUR",
-                          }).format(transaction.amount)}
-                        </p>
-                        <button
-                          onClick={() => handleDelete(transaction.id)}
-                          className="text-blue-500 hover:text-blue-700"
-                          aria-label="Eliminar movimiento"
-                        >
-                          <Trash className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : null}
             </div>
           ))}
         </div>
@@ -268,10 +370,21 @@ export const SavingsAccount: React.FC = () => {
       {/* Formulario de Registro */}
       <div
         className={`rounded-lg shadow-md p-6 ${
-          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-gray-900"
+          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
         }`}
       >
         <h2 className="text-xl font-semibold mb-4">Registrar transacción</h2>
+        {showAlert && (
+          <div
+            className={`rounded-lg p-4 mb-4 ${
+              isDarkMode
+                ? "bg-green-600 text-white"
+                : "bg-green-100 text-green-800"
+            }`}
+          >
+            ¡Transacción registrada con éxito!
+          </div>
+        )}
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
