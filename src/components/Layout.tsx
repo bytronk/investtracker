@@ -18,7 +18,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 overflow-x-hidden">
       <nav className="bg-white dark:bg-gray-800 shadow-lg">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16 items-center">
