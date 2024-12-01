@@ -76,9 +76,7 @@ export const SavingsAccount: React.FC = () => {
       date: new Date().toISOString().split("T")[0],
     });
 
-    // Mostrar la alerta
     setShowAlert(true);
-    // Ocultar la alerta después de 2 segundos
     setTimeout(() => setShowAlert(false), 3000);
   };
 
@@ -145,119 +143,72 @@ export const SavingsAccount: React.FC = () => {
     <div className="space-y-6">
       {/* Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div
-          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
-            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
-          } ${activeCard === "Mi Patrimonio" ? "scale-105" : ""}`}
-          {...(isTouchDevice
-            ? {
-                onTouchStart: () => setActiveCard("Mi Patrimonio"),
-                onTouchEnd: () => setActiveCard(null),
-              }
-            : {
-                onMouseEnter: () => setActiveCard("Mi Patrimonio"),
-                onMouseLeave: () => setActiveCard(null),
-              })}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Mi Patrimonio</h3>
-            <TrendingUp className="h-8 w-8 bg-blue-500 text-white p-1.5 rounded-full" />
+        {[
+          {
+            title: "Mi Patrimonio",
+            value: portfolio.savingsAccount,
+            icon: TrendingUp,
+            color: "bg-blue-500",
+          },
+          {
+            title: "Cuenta Remunerada",
+            value: portfolio.savingsAccount,
+            icon: PiggyBank,
+            color: "bg-green-500",
+          },
+          {
+            title: "Intereses",
+            value: totalInterest,
+            icon: Percent,
+            color: "bg-yellow-500",
+          },
+          {
+            title: "Dividendos",
+            value: totalDividends,
+            icon: DollarSign,
+            color: "bg-purple-500",
+          },
+        ].map((card, index) => (
+          <div
+            key={index}
+            className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 backdrop-blur-sm ${
+              isDarkMode
+                ? "bg-gray-800/30 text-gray-100"
+                : "bg-white/70 text-gray-900"
+            } ${activeCard === card.title ? "scale-105" : ""}`}
+            {...(isTouchDevice
+              ? {
+                  onTouchStart: () => setActiveCard(card.title),
+                  onTouchEnd: () => setActiveCard(null),
+                }
+              : {
+                  onMouseEnter: () => setActiveCard(card.title),
+                  onMouseLeave: () => setActiveCard(null),
+                })}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">{card.title}</h3>
+              <div
+                className={`${card.color} text-white p-1.5 rounded-full flex items-center justify-center`}
+              >
+                <card.icon className="h-5 w-5" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold">
+              {new Intl.NumberFormat("es-ES", {
+                style: "currency",
+                currency: "EUR",
+              }).format(card.value)}
+            </p>
           </div>
-          <p className="text-2xl font-bold">
-            {new Intl.NumberFormat("es-ES", {
-              style: "currency",
-              currency: "EUR",
-            }).format(
-              portfolio.savingsAccount +
-                portfolio.assets.reduce(
-                  (acc, asset) => acc + asset.totalInvested,
-                  0
-                )
-            )}
-          </p>
-        </div>
-        <div
-          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
-            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
-          } ${activeCard === "Cuenta Remunerada" ? "scale-105" : ""}`}
-          {...(isTouchDevice
-            ? {
-                onTouchStart: () => setActiveCard("Cuenta Remunerada"),
-                onTouchEnd: () => setActiveCard(null),
-              }
-            : {
-                onMouseEnter: () => setActiveCard("Cuenta Remunerada"),
-                onMouseLeave: () => setActiveCard(null),
-              })}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Disponible</h3>
-            <PiggyBank className="h-8 w-8 bg-blue-500 text-white p-1.5 rounded-full" />
-          </div>
-          <p className="text-2xl font-bold">
-            {new Intl.NumberFormat("es-ES", {
-              style: "currency",
-              currency: "EUR",
-            }).format(portfolio.savingsAccount)}
-          </p>
-        </div>
-        <div
-          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
-            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
-          } ${activeCard === "Intereses" ? "scale-105" : ""}`}
-          {...(isTouchDevice
-            ? {
-                onTouchStart: () => setActiveCard("Intereses"),
-                onTouchEnd: () => setActiveCard(null),
-              }
-            : {
-                onMouseEnter: () => setActiveCard("Intereses"),
-                onMouseLeave: () => setActiveCard(null),
-              })}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Intereses</h3>
-            <Percent className="h-8 w-8 bg-green-500 text-white p-1.5 rounded-full" />
-          </div>
-          <p className="text-2xl font-bold">
-            {new Intl.NumberFormat("es-ES", {
-              style: "currency",
-              currency: "EUR",
-            }).format(totalInterest)}
-          </p>
-        </div>
-        <div
-          className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
-            isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
-          } ${activeCard === "Dividendos" ? "scale-105" : ""}`}
-          {...(isTouchDevice
-            ? {
-                onTouchStart: () => setActiveCard("Dividendos"),
-                onTouchEnd: () => setActiveCard(null),
-              }
-            : {
-                onMouseEnter: () => setActiveCard("Dividendos"),
-                onMouseLeave: () => setActiveCard(null),
-              })}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Dividendos</h3>
-            <DollarSign className="h-8 w-8 bg-yellow-500 text-white p-1.5 rounded-full" />
-          </div>
-          <p className="text-2xl font-bold">
-            {new Intl.NumberFormat("es-ES", {
-              style: "currency",
-              currency: "EUR",
-            }).format(totalDividends)}
-          </p>
-        </div>
+        ))}
       </div>
 
       {/* Lista de Movimientos */}
       <div
         ref={transactionsRef}
-        className={`rounded-lg shadow-md p-6 ${
-          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+        className={`rounded-lg shadow-md p-6 backdrop-blur-sm ${
+          isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
         }`}
       >
         <button
@@ -299,8 +250,8 @@ export const SavingsAccount: React.FC = () => {
                           key={transaction.id}
                           className={`flex items-center justify-between p-2 px-2.5 border rounded-lg ${
                             isDarkMode
-                              ? "bg-gray-800 border-gray-700"
-                              : "bg-gray-100"
+                              ? "bg-gray-800/25 border-gray-800/30"
+                              : "bg-gray-100/40"
                           }`}
                         >
                           <div className="flex items-center space-x-3">
@@ -369,8 +320,8 @@ export const SavingsAccount: React.FC = () => {
 
       {/* Formulario de Registro */}
       <div
-        className={`rounded-lg shadow-md p-6 ${
-          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
+        className={`rounded-lg shadow-md p-6 backdrop-blur-sm ${
+          isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
         }`}
       >
         <h2 className="text-xl font-semibold mb-4">Registrar transacción</h2>
@@ -396,8 +347,8 @@ export const SavingsAccount: React.FC = () => {
             }
             className={`p-2 border rounded-md appearance-none ${
               isDarkMode
-                ? "bg-gray-800 text-gray-100 border-gray-700"
-                : "bg-gray-100 text-gray-900 border-gray-300"
+                ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+                : "bg-gray-100/10 text-gray-900 border-gray-150"
             } text-center`}
           >
             <option value="ingreso">Ingreso</option>
@@ -413,8 +364,8 @@ export const SavingsAccount: React.FC = () => {
             }
             className={`p-2 border rounded-md appearance-none ${
               isDarkMode
-                ? "bg-gray-800 text-gray-100 border-gray-700"
-                : "bg-gray-100 text-gray-900 border-gray-300"
+                ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+                : "bg-gray-100/10 text-gray-900 border-gray-150"
             } text-center`}
             placeholder="Importe (EUR)"
             required
@@ -428,8 +379,8 @@ export const SavingsAccount: React.FC = () => {
             }
             className={`p-2 border rounded-md appearance-none ${
               isDarkMode
-                ? "bg-gray-800 text-gray-100 border-gray-700"
-                : "bg-gray-100 text-gray-900 border-gray-300"
+                ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+                : "bg-gray-100/10 text-gray-900 border-gray-150"
             } text-center`}
             required
           />
