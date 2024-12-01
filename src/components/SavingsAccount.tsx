@@ -25,6 +25,7 @@ export const SavingsAccount: React.FC = () => {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const transactionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -84,6 +85,8 @@ export const SavingsAccount: React.FC = () => {
     const confirmDelete = window.confirm("¿Eliminar transacción?");
     if (confirmDelete) {
       deleteTransaction(id);
+      setShowDeleteAlert(true);
+      setTimeout(() => setShowDeleteAlert(false), 3000);
     }
   };
 
@@ -211,6 +214,17 @@ export const SavingsAccount: React.FC = () => {
           isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
         }`}
       >
+        {showDeleteAlert && (
+          <div
+            className={`rounded-lg p-4 mb-4 ${
+              isDarkMode
+                ? "bg-red-600 text-white"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            ¡Transacción eliminada con éxito!
+          </div>
+        )}
         <button
           onClick={handleToggleTransactions}
           className="text-xl font-semibold flex items-center justify-between w-full"
@@ -324,7 +338,6 @@ export const SavingsAccount: React.FC = () => {
           isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
         }`}
       >
-        <h2 className="text-xl font-semibold mb-4">Registrar transacción</h2>
         {showAlert && (
           <div
             className={`rounded-lg p-4 mb-4 ${
