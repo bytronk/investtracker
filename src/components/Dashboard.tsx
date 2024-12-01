@@ -77,9 +77,10 @@ export const Dashboard: React.FC = () => {
   return (
     <div
       className={`space-y-6 ${
-        isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
+        isDarkMode ? "bg-black text-gray-100" : "bg-gray-100 text-gray-900"
       } min-h-screen`}
     >
+      {/* Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => (
           <div
@@ -115,11 +116,13 @@ export const Dashboard: React.FC = () => {
         ))}
       </div>
 
+      {/* Listas de activos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AssetList type="crypto" />
         <AssetList type="stock" />
       </div>
 
+      {/* Formulario */}
       <div
         className={`rounded-lg shadow-md p-6 ${
           isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"

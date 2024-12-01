@@ -21,10 +21,11 @@ export const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-900 dark:to-black flex items-center justify-center p-4 relative">
+      {/* Formulario con efecto de glassmorphism */}
       <div
-        className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 flex flex-col justify-between transform -translate-y-16 sm:-translate-y-12"
-        style={{ minHeight: "28rem" }} // Altura uniforme
+        className="w-full max-w-md bg-white/10 dark:bg-gray-800/20 backdrop-blur-sl rounded-lg shadow-xl p-8 flex flex-col justify-between transform -translate-y-16 sm:-translate-y-12"
+        style={{ minHeight: "28rem" }}
       >
         {/* Título dentro del formulario */}
         <h1 className="text-4xl font-extralight tracking-wide text-center text-gray-900 dark:text-gray-100 mb-6 select-none">
@@ -48,7 +49,7 @@ export const Auth: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-label="Correo Electrónico"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border dark:border-transparent rounded-md bg-white/20 dark:bg-gray-700/10 backdrop-blur-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               required
             />
           </div>
@@ -65,7 +66,7 @@ export const Auth: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               aria-label="Contraseña"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border dark:border-transparent rounded-md bg-white/20 dark:bg-gray-700/10 backdrop-blur-md text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               required
             />
           </div>
@@ -92,7 +93,7 @@ export const Auth: React.FC = () => {
           )}
           <button
             type="submit"
-            className="w-full bg-blue-600 dark:bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition duration-200"
+            className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition duration-200"
           >
             {isLogin ? "Iniciar Sesión" : "Registrarse"}
           </button>
@@ -101,7 +102,7 @@ export const Auth: React.FC = () => {
           <button
             onClick={() => setIsLogin(!isLogin)}
             aria-label="Alternar entre iniciar sesión y registrarse"
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition duration-200"
+            className="text-blue-600 dark:text-blue-500 hover:text-blue-800 dark:hover:text-blue-400 transition duration-200"
           >
             {isLogin
               ? "¿No tienes cuenta? Regístrate"
@@ -115,15 +116,21 @@ export const Auth: React.FC = () => {
         vcdev investtracker © 2024
       </p>
 
-      {/* Botón flotante para cambiar de tema */}
+      {/* Botón flotante para cambiar de tema con glassmorphism */}
       <button
         onClick={toggleTheme}
-        className="fixed bottom-4 right-4 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 dark:bg-gray-700 dark:hover:bg-gray-600 transition transform hover:scale-110 active:scale-90"
+        className={`fixed bottom-4 right-4 p-2 rounded-full shadow-lg backdrop-blur-sm 
+          ${
+            isDarkMode
+              ? "bg-gray-500/10 text-white hover:bg-gray-500/20"
+              : "bg-white/10 text-gray-800 hover:bg-white/20"
+          } 
+          transition transform hover:scale-110 active:scale-90`}
       >
         {isDarkMode ? (
-          <Sun className="h-5 w-5" />
+          <Sun className="h-7 w-7" />
         ) : (
-          <Moon className="h-5 w-5" />
+          <Moon className="h-7 w-7" />
         )}
       </button>
     </div>
