@@ -21,26 +21,26 @@ body {
 
 /* Personalización del ícono del calendario */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  color: inherit; /* Hereda el color del texto */
-  filter: invert(50%) sepia(1) saturate(500%) hue-rotate(190deg); /* Ajusta el color */
-  opacity: 1; /* Asegura visibilidad */
+  color: inherit;
+  filter: invert(50%) sepia(1) saturate(500%) hue-rotate(190deg);
+  opacity: 1;
   margin-left: -20px;
 }
 
 /* Eliminación de la flecha del select */
 select {
-  appearance: none; /* Quita la flecha por defecto */
-  -moz-appearance: none; /* Firefox */
-  -webkit-appearance: none; /* Safari/Chrome */
-  text-align-last: center; /* Asegura que el texto esté centrado en pantallas móviles */
-  text-align: center; /* Asegura centrado en navegadores estándar */
-  padding-right: 0; /* Elimina espacio para la flecha (ya eliminada) */
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  text-align-last: center;
+  text-align: center;
+  padding-right: 0;
 }
 
 /* iOS específico para centrar opciones */
 @supports (-webkit-appearance: none) {
   select {
-    padding-left: 50%; /* Desplaza el texto hacia el centro */
+    padding-left: 50%;
   }
 }
 
@@ -50,6 +50,59 @@ select option {
 }
 
 /* Asegura que los inputs estén alineados verticalmente */
-input, select {
-  text-align: center; /* Centra el texto horizontalmente */
+input,
+select {
+  text-align: center;
+}
+
+/* Loader inicial */
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f3f4f6; /* Fondo claro por defecto */
+  color: #333; /* Texto oscuro */
+  font-size: 1.5rem;
+  font-family: Arial, sans-serif;
+  position: relative;
+}
+
+html.dark .loader {
+  background-color: #000; /* Fondo oscuro para el loader */
+  color: #fff; /* Texto blanco */
+}
+
+.dots {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 1rem;
+  height: 1rem;
+  background-color: currentColor;
+  border-radius: 50%;
+  animation: bounce 1.5s infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }

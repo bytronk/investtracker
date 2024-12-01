@@ -14,10 +14,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
+    const isDark = savedTheme === "dark";
+    setIsDarkMode(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
+    document.body.style.backgroundColor = isDark ? "#000" : "#f3f4f6";
   }, []);
 
   const toggleTheme = () => {
@@ -25,6 +25,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       const newMode = !prev;
       localStorage.setItem("theme", newMode ? "dark" : "light");
       document.documentElement.classList.toggle("dark", newMode);
+      document.body.style.backgroundColor = newMode ? "#000" : "#f3f4f6";
       return newMode;
     });
   };
