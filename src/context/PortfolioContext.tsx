@@ -68,8 +68,13 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
           quantity: currentAsset.quantity + quantity,
           totalInvested: currentAsset.totalInvested - proportionalAmount,
         };
+
+        // Evitar valores negativos por redondeo
+        if (portfolio.assets[assetIndex].totalInvested < 0) {
+          portfolio.assets[assetIndex].totalInvested = 0;
+        }
       } else {
-        // Si es una compra, simplemente sumar
+        // Si es una compra, simplemente sumar cantidad e importe
         portfolio.assets[assetIndex] = {
           ...currentAsset,
           quantity: currentAsset.quantity + quantity,
@@ -77,6 +82,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
         };
       }
 
+      // Eliminar el activo si la cantidad llega a 0
       if (portfolio.assets[assetIndex].quantity <= 0) {
         portfolio.assets.splice(assetIndex, 1);
       }
