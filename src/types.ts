@@ -9,9 +9,7 @@ export interface User {
 export interface Asset {
   id: string; // ID único del activo
   symbol: string; // Símbolo del activo (por ejemplo, BTC para Bitcoin)
-  name: string; // Nombre del activo
   type: "crypto" | "stock"; // Tipo de activo: cripto o acción
-  logoUrl: string; // URL del logotipo del activo
   quantity: number; // Cantidad del activo poseído
   totalInvested: number; // Total invertido en este activo
 }

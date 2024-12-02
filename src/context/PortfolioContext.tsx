@@ -1,14 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Portfolio, Asset, Transaction } from "../types";
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { Portfolio, Transaction } from "../types";
 import { useAuth } from "./AuthContext";
 
 interface PortfolioContextType {
   portfolio: Portfolio;
-  addAsset: (asset: Omit<Asset, "id">) => void;
-  updateAsset: (symbol: string, quantity: number, amount: number) => void;
+  updateAsset: (
+    symbol: string,
+    quantity: number,
+    amount: number,
+    type: "crypto" | "stock"
+  ) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => void;
-  updateTransaction: (transaction: Transaction) => void;
 }
 
 const PortfolioContext = createContext<PortfolioContextType | null>(null);
@@ -42,37 +45,47 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const addAsset = (asset: Omit<Asset, "id">) => {
-    const newAsset = { ...asset, id: Date.now().toString() };
-    const newPortfolio = {
-      ...portfolio,
-      assets: [...portfolio.assets, newAsset],
-    };
-    savePortfolio(newPortfolio);
-  };
-
-  const updateAsset = (symbol: string, quantity: number, amount: number) => {
+  const updateAsset = (
+    symbol: string,
+    quantity: number,
+    amount: number,
+    type: "crypto" | "stock"
+  ) => {
     const assetIndex = portfolio.assets.findIndex(
       (asset) => asset.symbol === symbol
     );
 
     if (assetIndex !== -1) {
-      portfolio.assets[assetIndex] = {
-        ...portfolio.assets[assetIndex],
-        quantity: portfolio.assets[assetIndex].quantity + quantity,
-        totalInvested: portfolio.assets[assetIndex].totalInvested + amount,
-      };
+      const currentAsset = portfolio.assets[assetIndex];
+
+      if (quantity < 0) {
+        // Si es una venta, ajustar `totalInvested` proporcionalmente
+        const proportion = Math.abs(quantity) / currentAsset.quantity;
+        const proportionalAmount = currentAsset.totalInvested * proportion;
+
+        portfolio.assets[assetIndex] = {
+          ...currentAsset,
+          quantity: currentAsset.quantity + quantity,
+          totalInvested: currentAsset.totalInvested - proportionalAmount,
+        };
+      } else {
+        // Si es una compra, simplemente sumar
+        portfolio.assets[assetIndex] = {
+          ...currentAsset,
+          quantity: currentAsset.quantity + quantity,
+          totalInvested: currentAsset.totalInvested + amount,
+        };
+      }
 
       if (portfolio.assets[assetIndex].quantity <= 0) {
-        portfolio.assets.splice(assetIndex, 1); // Eliminar si la cantidad es 0 o negativa
+        portfolio.assets.splice(assetIndex, 1);
       }
     } else if (quantity > 0) {
+      // Agregar un nuevo activo si no existe
       portfolio.assets.push({
         id: Date.now().toString(),
         symbol,
-        name: symbol,
-        type: "crypto",
-        logoUrl: "",
+        type,
         quantity,
         totalInvested: amount,
       });
@@ -95,14 +108,16 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       updateAsset(
         transaction.assetId || "",
         transaction.quantity || 0,
-        transaction.amount
+        transaction.amount,
+        transaction.assetId === "crypto" ? "crypto" : "stock"
       );
     } else if (transaction.type === "venta") {
       newSavingsAccount += transaction.amount;
       updateAsset(
         transaction.assetId || "",
         -(transaction.quantity || 0),
-        -transaction.amount
+        -transaction.amount,
+        transaction.assetId === "crypto" ? "crypto" : "stock"
       );
     } else if (
       ["ingreso", "interes", "dividendo"].includes(transaction.type)
@@ -129,13 +144,27 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     let newSavingsAccount = portfolio.savingsAccount;
 
     if (
-      ["ingreso", "interes", "dividendo", "venta"].includes(
-        transactionToDelete.type
-      )
+      ["ingreso", "interes", "dividendo"].includes(transactionToDelete.type)
     ) {
       newSavingsAccount -= transactionToDelete.amount;
-    } else if (["retiro", "compra"].includes(transactionToDelete.type)) {
+    } else if (transactionToDelete.type === "retiro") {
       newSavingsAccount += transactionToDelete.amount;
+    } else if (transactionToDelete.type === "compra") {
+      newSavingsAccount += transactionToDelete.amount;
+      updateAsset(
+        transactionToDelete.assetId || "",
+        -(transactionToDelete.quantity || 0),
+        -transactionToDelete.amount,
+        transactionToDelete.assetId === "crypto" ? "crypto" : "stock"
+      );
+    } else if (transactionToDelete.type === "venta") {
+      newSavingsAccount -= transactionToDelete.amount;
+      updateAsset(
+        transactionToDelete.assetId || "",
+        transactionToDelete.quantity || 0,
+        transactionToDelete.amount,
+        transactionToDelete.assetId === "crypto" ? "crypto" : "stock"
+      );
     }
 
     const updatedTransactions = portfolio.transactions.filter(
@@ -150,58 +179,13 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     savePortfolio(newPortfolio);
   };
 
-  const updateTransaction = (updatedTransaction: Transaction) => {
-    const previousTransaction = portfolio.transactions.find(
-      (transaction) => transaction.id === updatedTransaction.id
-    );
-
-    if (!previousTransaction) return;
-
-    let newSavingsAccount = portfolio.savingsAccount;
-
-    if (
-      ["ingreso", "interes", "dividendo", "venta"].includes(
-        previousTransaction.type
-      )
-    ) {
-      newSavingsAccount -= previousTransaction.amount;
-    } else if (["retiro", "compra"].includes(previousTransaction.type)) {
-      newSavingsAccount += previousTransaction.amount;
-    }
-
-    if (
-      ["ingreso", "interes", "dividendo", "venta"].includes(
-        updatedTransaction.type
-      )
-    ) {
-      newSavingsAccount += updatedTransaction.amount;
-    } else if (["retiro", "compra"].includes(updatedTransaction.type)) {
-      newSavingsAccount -= updatedTransaction.amount;
-    }
-
-    const updatedTransactions = portfolio.transactions.map((transaction) =>
-      transaction.id === updatedTransaction.id
-        ? updatedTransaction
-        : transaction
-    );
-
-    const newPortfolio = {
-      ...portfolio,
-      transactions: updatedTransactions,
-      savingsAccount: newSavingsAccount,
-    };
-    savePortfolio(newPortfolio);
-  };
-
   return (
     <PortfolioContext.Provider
       value={{
         portfolio,
-        addAsset, // Asegúrate de que esta propiedad esté definida aquí
         updateAsset,
         addTransaction,
         deleteTransaction,
-        updateTransaction,
       }}
     >
       {children}

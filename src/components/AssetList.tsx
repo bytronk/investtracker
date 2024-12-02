@@ -28,18 +28,11 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
             className="flex items-center justify-between p-4 bg-gray-50/70 dark:bg-gray-700/30 rounded-lg 
             hover:bg-gray-100/70 dark:hover:bg-gray-600/30 transition-colors duration-200"
           >
-            <div className="flex items-center space-x-4">
-              <img
-                src={asset.logoUrl}
-                alt={asset.name}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <h3 className="font-medium">{asset.symbol}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {asset.name}
-                </p>
-              </div>
+            <div>
+              <h3 className="font-medium">{asset.symbol}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {type === "crypto" ? "Criptomoneda" : "Acción"}
+              </p>
             </div>
             <div className="text-right">
               <p className="font-medium">

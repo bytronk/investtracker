@@ -102,6 +102,22 @@ export const SavingsAccount: React.FC = () => {
     .filter((transaction) => transaction.type === "dividendo")
     .reduce((sum, transaction) => sum + transaction.amount, 0);
 
+  const calculateTotals = () => {
+    const cryptoTotal = portfolio.assets
+      .filter((asset) => asset.type === "crypto")
+      .reduce((sum, asset) => sum + asset.totalInvested, 0);
+
+    const stocksTotal = portfolio.assets
+      .filter((asset) => asset.type === "stock")
+      .reduce((sum, asset) => sum + asset.totalInvested, 0);
+
+    return {
+      patrimonio: cryptoTotal + stocksTotal + portfolio.savingsAccount,
+    };
+  };
+
+  const totals = calculateTotals();
+
   const groupedByMonth = sortedTransactions.reduce<Record<string, Transaction[]>>(
     (groups, transaction) => {
       const date = new Date(transaction.date);
@@ -149,7 +165,7 @@ export const SavingsAccount: React.FC = () => {
         {[
           {
             title: "Mi Patrimonio",
-            value: portfolio.savingsAccount,
+            value: totals.patrimonio,
             icon: TrendingUp,
             color: "bg-blue-500",
           },

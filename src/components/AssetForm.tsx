@@ -5,7 +5,13 @@ import { useTheme } from "../context/ThemeContext";
 export const AssetForm: React.FC = () => {
   const { updateAsset, addTransaction } = usePortfolio();
   const { isDarkMode } = useTheme();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    type: "crypto" | "stock";
+    quantity: string;
+    amount: string;
+    date: string;
+    operation: "buy" | "sell";
+  }>({
     type: "crypto",
     quantity: "",
     amount: "",
@@ -28,14 +34,18 @@ export const AssetForm: React.FC = () => {
       addTransaction({
         type: "compra",
         amount,
+        quantity,
         date: formData.date,
+        assetId: formData.type,
       });
     } else {
-      updateAsset("", -quantity, -amount); // Ajustar según lógica de tu aplicación
+      updateAsset(formData.type, -quantity, -amount, formData.type);
       addTransaction({
         type: "venta",
         amount,
+        quantity,
         date: formData.date,
+        assetId: formData.type,
       });
     }
 
@@ -57,7 +67,7 @@ export const AssetForm: React.FC = () => {
         isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
       }`}
     >
-      <h2 className="text-xl font-semibold mb-4">Registrar Operación</h2>
+      <h2 className="text-xl font-semibold mb-4">Registrar operación</h2>
       {showAlert && (
         <div
           className={`rounded-lg p-4 mb-4 ${
@@ -76,7 +86,7 @@ export const AssetForm: React.FC = () => {
         <select
           value={formData.type}
           onChange={(e) =>
-            setFormData({ ...formData, type: e.target.value })
+            setFormData({ ...formData, type: e.target.value as "crypto" | "stock" })
           }
           className={`p-2 border rounded-md appearance-none ${
             isDarkMode
@@ -90,7 +100,7 @@ export const AssetForm: React.FC = () => {
         <select
           value={formData.operation}
           onChange={(e) =>
-            setFormData({ ...formData, operation: e.target.value })
+            setFormData({ ...formData, operation: e.target.value as "buy" | "sell" })
           }
           className={`p-2 border rounded-md appearance-none ${
             isDarkMode
