@@ -1,29 +1,18 @@
 import React, { useState } from "react";
 import { usePortfolio } from "../context/PortfolioContext";
+import { useTheme } from "../context/ThemeContext";
 
 export const AssetForm: React.FC = () => {
-  const { addAsset, updateAsset, addTransaction } = usePortfolio();
+  const { updateAsset, addTransaction } = usePortfolio();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     type: "crypto",
-    symbol: "",
-    name: "",
-    logoUrl: "",
     quantity: "",
     amount: "",
+    date: new Date().toISOString().split("T")[0],
     operation: "buy",
   });
-
-  const resetForm = () => {
-    setFormData({
-      type: "crypto",
-      symbol: "",
-      name: "",
-      logoUrl: "",
-      quantity: "",
-      amount: "",
-      operation: "buy",
-    });
-  };
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,158 +25,132 @@ export const AssetForm: React.FC = () => {
     }
 
     if (formData.operation === "buy") {
-      const asset = {
-        symbol: formData.symbol.toUpperCase(),
-        name: formData.name,
-        type: formData.type as "crypto" | "stock",
-        logoUrl: formData.logoUrl,
-        quantity,
-        totalInvested: amount,
-      };
-      addAsset(asset);
       addTransaction({
         type: "compra",
         amount,
-        description: `Compra de ${quantity} ${formData.symbol.toUpperCase()}`,
+        date: formData.date,
       });
     } else {
-      updateAsset(formData.symbol, -quantity, -amount);
+      updateAsset("", -quantity, -amount); // Ajustar según lógica de tu aplicación
       addTransaction({
         type: "venta",
         amount,
-        description: `Venta de ${quantity} ${formData.symbol.toUpperCase()}`,
+        date: formData.date,
       });
     }
 
-    resetForm();
+    setShowAlert(true);
+    setTimeout(() => setShowAlert(false), 3000);
+
+    setFormData({
+      type: "crypto",
+      quantity: "",
+      amount: "",
+      date: new Date().toISOString().split("T")[0],
+      operation: "buy",
+    });
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg"
+    <div
+      className={`rounded-lg shadow-md p-6 backdrop-blur-sm ${
+        isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
+      }`}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tipo de Activo
-          </label>
-          <select
-            value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          >
-            <option value="crypto">Criptomoneda</option>
-            <option value="stock">Acción</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Operación
-          </label>
-          <select
-            value={formData.operation}
-            onChange={(e) =>
-              setFormData({ ...formData, operation: e.target.value })
-            }
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          >
-            <option value="buy">Compra</option>
-            <option value="sell">Venta</option>
-          </select>
-        </div>
-        {formData.operation === "buy" && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Símbolo
-              </label>
-              <input
-                type="text"
-                value={formData.symbol}
-                onChange={(e) =>
-                  setFormData({ ...formData, symbol: e.target.value })
-                }
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Nombre
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                URL del Logo
-              </label>
-              <input
-                type="url"
-                value={formData.logoUrl}
-                onChange={(e) =>
-                  setFormData({ ...formData, logoUrl: e.target.value })
-                }
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                required
-              />
-            </div>
-          </>
-        )}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Cantidad
-          </label>
-          <input
-            type="number"
-            value={formData.quantity}
-            onChange={(e) =>
-              setFormData({ ...formData, quantity: e.target.value })
-            }
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            required
-            step="any"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Importe (EUR)
-          </label>
-          <input
-            type="number"
-            value={formData.amount}
-            onChange={(e) =>
-              setFormData({ ...formData, amount: e.target.value })
-            }
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            required
-            step="any"
-          />
-        </div>
-      </div>
-      <div className="flex justify-between items-center space-x-4">
-        <button
-          type="button"
-          onClick={resetForm}
-          className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-md hover:bg-gray-600 transition duration-200 text-center"
+      <h2 className="text-xl font-semibold mb-4">Registrar Operación</h2>
+      {showAlert && (
+        <div
+          className={`rounded-lg p-4 mb-4 ${
+            isDarkMode
+              ? "bg-green-600 text-white"
+              : "bg-green-100 text-green-800"
+          }`}
         >
-          Limpiar
-        </button>
+          ¡Operación registrada con éxito!
+        </div>
+      )}
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <select
+          value={formData.type}
+          onChange={(e) =>
+            setFormData({ ...formData, type: e.target.value })
+          }
+          className={`p-2 border rounded-md appearance-none ${
+            isDarkMode
+              ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+              : "bg-gray-100/10 text-gray-900 border-gray-150"
+          } text-center`}
+        >
+          <option value="crypto">Criptomoneda</option>
+          <option value="stock">Acción</option>
+        </select>
+        <select
+          value={formData.operation}
+          onChange={(e) =>
+            setFormData({ ...formData, operation: e.target.value })
+          }
+          className={`p-2 border rounded-md appearance-none ${
+            isDarkMode
+              ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+              : "bg-gray-100/10 text-gray-900 border-gray-150"
+          } text-center`}
+        >
+          <option value="buy">Compra</option>
+          <option value="sell">Venta</option>
+        </select>
+        <input
+          type="number"
+          value={formData.quantity}
+          onChange={(e) =>
+            setFormData({ ...formData, quantity: e.target.value })
+          }
+          className={`p-2 border rounded-md appearance-none ${
+            isDarkMode
+              ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+              : "bg-gray-100/10 text-gray-900 border-gray-150"
+          } text-center`}
+          placeholder="Cantidad"
+          required
+          step="any"
+        />
+        <input
+          type="number"
+          value={formData.amount}
+          onChange={(e) =>
+            setFormData({ ...formData, amount: e.target.value })
+          }
+          className={`p-2 border rounded-md appearance-none ${
+            isDarkMode
+              ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+              : "bg-gray-100/10 text-gray-900 border-gray-150"
+          } text-center`}
+          placeholder="Importe (EUR)"
+          required
+          step="any"
+        />
+        <input
+          type="date"
+          value={formData.date}
+          onChange={(e) =>
+            setFormData({ ...formData, date: e.target.value })
+          }
+          className={`p-2 border rounded-md appearance-none ${
+            isDarkMode
+              ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
+              : "bg-gray-100/10 text-gray-900 border-gray-150"
+          } text-center`}
+          required
+        />
         <button
           type="submit"
-          className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition duration-200 text-center"
+          className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 transition duration-200"
         >
           Registrar
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };

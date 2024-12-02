@@ -16,15 +16,17 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
       : "No hay acciones registradas";
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-        {title}
-      </h2>
+    <div
+      className="rounded-lg shadow-md p-6 backdrop-blur-sm
+      bg-white/70 dark:bg-gray-800/30 text-gray-900 dark:text-gray-100"
+    >
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
       <div className="space-y-4">
         {assets.map((asset) => (
           <div
             key={asset.id}
-            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
+            className="flex items-center justify-between p-4 bg-gray-50/70 dark:bg-gray-700/30 rounded-lg 
+            hover:bg-gray-100/70 dark:hover:bg-gray-600/30 transition-colors duration-200"
           >
             <div className="flex items-center space-x-4">
               <img
@@ -33,16 +35,14 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
                 className="w-10 h-10 rounded-full"
               />
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                  {asset.symbol}
-                </h3>
+                <h3 className="font-medium">{asset.symbol}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {asset.name}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="font-medium text-gray-900 dark:text-gray-100">
+              <p className="font-medium">
                 {new Intl.NumberFormat("es-ES", {
                   style: "currency",
                   currency: "EUR",

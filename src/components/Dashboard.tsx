@@ -85,10 +85,10 @@ export const Dashboard: React.FC = () => {
         {cards.map((card) => (
           <div
             key={card.title}
-            className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 ${
+            className={`rounded-lg shadow-md p-6 transform transition-transform duration-200 backdrop-blur-sm ${
               isDarkMode
-                ? "bg-gray-800 text-gray-100"
-                : "bg-white text-gray-900"
+                ? "bg-gray-800/30 text-gray-100"
+                : "bg-white/70 text-gray-900"
             } ${activeCard === card.title ? "scale-105" : ""}`}
             {...(isTouchDevice
               ? {
@@ -101,10 +101,12 @@ export const Dashboard: React.FC = () => {
                 })}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{card.title}</h3>
-              <card.icon
-                className={`h-8 w-8 ${card.color} text-white p-1.5 rounded-full`}
-              />
+              <h3 className="text-xl font-semibold">{card.title}</h3>
+              <div
+                className={`${card.color} text-white p-1.5 rounded-full flex items-center justify-center`}
+              >
+                <card.icon className="h-5 w-5" />
+              </div>
             </div>
             <p className="text-2xl font-bold">
               {new Intl.NumberFormat("es-ES", {
@@ -123,14 +125,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Formulario */}
-      <div
-        className={`rounded-lg shadow-md p-6 ${
-          isDarkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"
-        }`}
-      >
-        <h2 className="text-xl font-semibold mb-4">Registrar Operación</h2>
-        <AssetForm />
-      </div>
+      <AssetForm />
     </div>
   );
 };

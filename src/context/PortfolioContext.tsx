@@ -5,10 +5,10 @@ import { useAuth } from "./AuthContext";
 interface PortfolioContextType {
   portfolio: Portfolio;
   addAsset: (asset: Omit<Asset, "id">) => void;
-  updateAsset: (assetId: string, quantity: number, amount: number) => void;
+  updateAsset: (symbol: string, quantity: number, amount: number) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => void;
-  updateTransaction: (transaction: Transaction) => void; // Añadido aquí
+  updateTransaction: (transaction: Transaction) => void;
 }
 
 const PortfolioContext = createContext<PortfolioContextType | null>(null);
@@ -51,17 +51,34 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     savePortfolio(newPortfolio);
   };
 
-  const updateAsset = (assetId: string, quantity: number, amount: number) => {
-    const newAssets = portfolio.assets.map((asset) =>
-      asset.id === assetId
-        ? {
-            ...asset,
-            quantity: asset.quantity + quantity,
-            totalInvested: asset.totalInvested + amount,
-          }
-        : asset
+  const updateAsset = (symbol: string, quantity: number, amount: number) => {
+    const assetIndex = portfolio.assets.findIndex(
+      (asset) => asset.symbol === symbol
     );
-    savePortfolio({ ...portfolio, assets: newAssets });
+
+    if (assetIndex !== -1) {
+      portfolio.assets[assetIndex] = {
+        ...portfolio.assets[assetIndex],
+        quantity: portfolio.assets[assetIndex].quantity + quantity,
+        totalInvested: portfolio.assets[assetIndex].totalInvested + amount,
+      };
+
+      if (portfolio.assets[assetIndex].quantity <= 0) {
+        portfolio.assets.splice(assetIndex, 1); // Eliminar si la cantidad es 0 o negativa
+      }
+    } else if (quantity > 0) {
+      portfolio.assets.push({
+        id: Date.now().toString(),
+        symbol,
+        name: symbol,
+        type: "crypto",
+        logoUrl: "",
+        quantity,
+        totalInvested: amount,
+      });
+    }
+
+    savePortfolio({ ...portfolio });
   };
 
   const addTransaction = (transaction: Omit<Transaction, "id">) => {
@@ -72,11 +89,26 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     let newSavingsAccount = portfolio.savingsAccount;
-    if (
-      ["ingreso", "interes", "dividendo", "venta"].includes(transaction.type)
+
+    if (transaction.type === "compra") {
+      newSavingsAccount -= transaction.amount;
+      updateAsset(
+        transaction.assetId || "",
+        transaction.quantity || 0,
+        transaction.amount
+      );
+    } else if (transaction.type === "venta") {
+      newSavingsAccount += transaction.amount;
+      updateAsset(
+        transaction.assetId || "",
+        -(transaction.quantity || 0),
+        -transaction.amount
+      );
+    } else if (
+      ["ingreso", "interes", "dividendo"].includes(transaction.type)
     ) {
       newSavingsAccount += transaction.amount;
-    } else if (["retiro", "compra"].includes(transaction.type)) {
+    } else if (transaction.type === "retiro") {
       newSavingsAccount -= transaction.amount;
     }
 
@@ -95,6 +127,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!transactionToDelete) return;
 
     let newSavingsAccount = portfolio.savingsAccount;
+
     if (
       ["ingreso", "interes", "dividendo", "venta"].includes(
         transactionToDelete.type
@@ -126,7 +159,6 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     let newSavingsAccount = portfolio.savingsAccount;
 
-    // Revert previous transaction
     if (
       ["ingreso", "interes", "dividendo", "venta"].includes(
         previousTransaction.type
@@ -137,7 +169,6 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       newSavingsAccount += previousTransaction.amount;
     }
 
-    // Apply updated transaction
     if (
       ["ingreso", "interes", "dividendo", "venta"].includes(
         updatedTransaction.type
@@ -166,11 +197,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     <PortfolioContext.Provider
       value={{
         portfolio,
-        addAsset,
+        addAsset, // Asegúrate de que esta propiedad esté definida aquí
         updateAsset,
         addTransaction,
         deleteTransaction,
-        updateTransaction, // Incluido aquí
+        updateTransaction,
       }}
     >
       {children}

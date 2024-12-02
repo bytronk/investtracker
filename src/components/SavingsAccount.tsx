@@ -154,7 +154,7 @@ export const SavingsAccount: React.FC = () => {
             color: "bg-blue-500",
           },
           {
-            title: "Cuenta Remunerada",
+            title: "Disponible",
             value: portfolio.savingsAccount,
             icon: PiggyBank,
             color: "bg-green-500",
@@ -190,7 +190,7 @@ export const SavingsAccount: React.FC = () => {
                 })}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{card.title}</h3>
+              <h3 className="text-xl font-semibold">{card.title}</h3>
               <div
                 className={`${card.color} text-white p-1.5 rounded-full flex items-center justify-center`}
               >
@@ -247,7 +247,7 @@ export const SavingsAccount: React.FC = () => {
                 <>
                   <h3
                     className={`text-lg font-semibold mt-6 mb-2 ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                      isDarkMode ? "text-gray-100" : "text-gray-900"
                     }`}
                   >
                     {monthKey === currentMonthKey
@@ -338,6 +338,7 @@ export const SavingsAccount: React.FC = () => {
           isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
         }`}
       >
+        <h2 className="text-xl font-semibold mb-4">Registrar transacción</h2>
         {showAlert && (
           <div
             className={`rounded-lg p-4 mb-4 ${
