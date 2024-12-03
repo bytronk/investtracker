@@ -280,8 +280,8 @@ export const SavingsAccount: React.FC = () => {
                           key={transaction.id}
                           className={`flex items-center justify-between p-2 px-2.5 border rounded-lg ${
                             isDarkMode
-                              ? "bg-gray-800/25 border-gray-800/30"
-                              : "bg-gray-100/40"
+                              ? "bg-gray-800/5 border-gray-700/10"
+                              : "bg-white-70 border-gray-500/10"
                           }`}
                         >
                           <div className="flex items-center space-x-3">
@@ -377,8 +377,8 @@ export const SavingsAccount: React.FC = () => {
             }
             className={`p-2 border rounded-md appearance-none ${
               isDarkMode
-                ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
-                : "bg-gray-100/10 text-gray-900 border-gray-150"
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/5 border-gray-500/10"
             } text-center`}
           >
             <option value="ingreso">Ingreso</option>
@@ -394,8 +394,8 @@ export const SavingsAccount: React.FC = () => {
             }
             className={`p-2 border rounded-md appearance-none ${
               isDarkMode
-                ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
-                : "bg-gray-100/10 text-gray-900 border-gray-150"
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/5 border-gray-500/10"
             } text-center`}
             placeholder="Importe (EUR)"
             required
@@ -409,8 +409,8 @@ export const SavingsAccount: React.FC = () => {
             }
             className={`p-2 border rounded-md appearance-none ${
               isDarkMode
-                ? "bg-gray-800/20 text-gray-100 border-gray-700/20"
-                : "bg-gray-100/10 text-gray-900 border-gray-150"
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/5 border-gray-500/10"
             } text-center`}
             required
           />
