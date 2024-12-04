@@ -1,12 +1,12 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { Portfolio, Transaction } from "../types";
 import { useAuth } from "./AuthContext";
+import { cryptoAssets, stockAssets } from "../data/assets";
 
 interface PortfolioContextType {
   portfolio: Portfolio;
   updateAsset: (
     symbol: string,
-    quantity: number,
     amount: number,
     type: "crypto" | "stock"
   ) => void;
@@ -45,54 +45,41 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const determineAssetType = (assetId: string): "crypto" | "stock" => {
+    if (cryptoAssets.some((asset) => asset.id === assetId)) {
+      return "crypto";
+    }
+    if (stockAssets.some((asset) => asset.id === assetId)) {
+      return "stock";
+    }
+    throw new Error(`Asset ID "${assetId}" no pertenece a ningún tipo conocido.`);
+  };
+
   const updateAsset = (
     symbol: string,
-    quantity: number,
     amount: number,
     type: "crypto" | "stock"
   ) => {
     const assetIndex = portfolio.assets.findIndex(
-      (asset) => asset.symbol === symbol
+      (asset) => asset.symbol === symbol && asset.type === type
     );
 
     if (assetIndex !== -1) {
       const currentAsset = portfolio.assets[assetIndex];
 
-      if (quantity < 0) {
-        // Si es una venta, ajustar `totalInvested` proporcionalmente
-        const proportion = Math.abs(quantity) / currentAsset.quantity;
-        const proportionalAmount = currentAsset.totalInvested * proportion;
+      portfolio.assets[assetIndex] = {
+        ...currentAsset,
+        totalInvested: currentAsset.totalInvested + amount,
+      };
 
-        portfolio.assets[assetIndex] = {
-          ...currentAsset,
-          quantity: currentAsset.quantity + quantity,
-          totalInvested: currentAsset.totalInvested - proportionalAmount,
-        };
-
-        // Evitar valores negativos por redondeo
-        if (portfolio.assets[assetIndex].totalInvested < 0) {
-          portfolio.assets[assetIndex].totalInvested = 0;
-        }
-      } else {
-        // Si es una compra, simplemente sumar cantidad e importe
-        portfolio.assets[assetIndex] = {
-          ...currentAsset,
-          quantity: currentAsset.quantity + quantity,
-          totalInvested: currentAsset.totalInvested + amount,
-        };
-      }
-
-      // Eliminar el activo si la cantidad llega a 0
-      if (portfolio.assets[assetIndex].quantity <= 0) {
+      if (portfolio.assets[assetIndex].totalInvested <= 0) {
         portfolio.assets.splice(assetIndex, 1);
       }
-    } else if (quantity > 0) {
-      // Agregar un nuevo activo si no existe
+    } else if (amount > 0) {
       portfolio.assets.push({
         id: Date.now().toString(),
         symbol,
         type,
-        quantity,
         totalInvested: amount,
       });
     }
@@ -111,20 +98,12 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (transaction.type === "compra") {
       newSavingsAccount -= transaction.amount;
-      updateAsset(
-        transaction.assetId || "",
-        transaction.quantity || 0,
-        transaction.amount,
-        transaction.assetId === "crypto" ? "crypto" : "stock"
-      );
+      const assetType = determineAssetType(transaction.assetId || "");
+      updateAsset(transaction.assetId || "", transaction.amount, assetType);
     } else if (transaction.type === "venta") {
       newSavingsAccount += transaction.amount;
-      updateAsset(
-        transaction.assetId || "",
-        -(transaction.quantity || 0),
-        -transaction.amount,
-        transaction.assetId === "crypto" ? "crypto" : "stock"
-      );
+      const assetType = determineAssetType(transaction.assetId || "");
+      updateAsset(transaction.assetId || "", -transaction.amount, assetType);
     } else if (
       ["ingreso", "interes", "dividendo"].includes(transaction.type)
     ) {
@@ -157,19 +136,19 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       newSavingsAccount += transactionToDelete.amount;
     } else if (transactionToDelete.type === "compra") {
       newSavingsAccount += transactionToDelete.amount;
+      const assetType = determineAssetType(transactionToDelete.assetId || "");
       updateAsset(
         transactionToDelete.assetId || "",
-        -(transactionToDelete.quantity || 0),
         -transactionToDelete.amount,
-        transactionToDelete.assetId === "crypto" ? "crypto" : "stock"
+        assetType
       );
     } else if (transactionToDelete.type === "venta") {
       newSavingsAccount -= transactionToDelete.amount;
+      const assetType = determineAssetType(transactionToDelete.assetId || "");
       updateAsset(
         transactionToDelete.assetId || "",
-        transactionToDelete.quantity || 0,
         transactionToDelete.amount,
-        transactionToDelete.assetId === "crypto" ? "crypto" : "stock"
+        assetType
       );
     }
 

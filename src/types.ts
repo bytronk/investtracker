@@ -10,7 +10,6 @@ export interface Asset {
   id: string; // ID único del activo
   symbol: string; // Símbolo del activo (por ejemplo, BTC para Bitcoin)
   type: "crypto" | "stock"; // Tipo de activo: cripto o acción
-  quantity: number; // Cantidad del activo poseído
   totalInvested: number; // Total invertido en este activo
 }
 
@@ -21,7 +20,6 @@ export interface Transaction {
   type: "ingreso" | "interes" | "dividendo" | "venta" | "retiro" | "compra"; // Tipo de transacción
   amount: number; // Monto de la transacción
   assetId?: string; // ID del activo relacionado (opcional para transacciones generales)
-  quantity?: number; // Cantidad de activo relacionada con la transacción (opcional)
 }
 
 // Representa el portafolio completo del usuario

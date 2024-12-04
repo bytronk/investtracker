@@ -22,6 +22,7 @@ export const SavingsAccount: React.FC = () => {
     date: new Date().toISOString().split("T")[0],
   });
   const [activeCard, setActiveCard] = useState<string | null>(null);
+  const [activeTransaction, setActiveTransaction] = useState<string | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -247,14 +248,14 @@ export const SavingsAccount: React.FC = () => {
         >
           Transacciones{" "}
           <ChevronDown
-            className={`h-6 w-6 text-blue-500 transform transition-transform ${
+            className={`h-7 w-7 text-blue-500 transform transition-transform ${
               showAllTransactions ? "rotate-180" : "rotate-0"
             }`}
           />
         </button>
         <div
-          className={`overflow-hidden transition-all duration-1000 ease-in-out ${
-            showAllTransactions ? "max-h-[3000px]" : "max-h-96"
+          className={`overflow-hidden transition-all duration-500 ease-in-out ${
+            showAllTransactions ? "max-h-[4000px]" : "max-h-80"
           }`}
         >
           {Object.entries(groupedByMonth).map(([monthKey, transactions]) => (
@@ -275,14 +276,27 @@ export const SavingsAccount: React.FC = () => {
                   <div className="space-y-3">
                     {transactions.map((transaction) => {
                       const Icon = getTransactionIcon(transaction.type);
+                      const isActive = activeTransaction === transaction.id;
                       return (
                         <div
                           key={transaction.id}
-                          className={`flex items-center justify-between p-2 px-2.5 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-800/5 border-gray-700/10"
-                              : "bg-white-70 border-gray-500/10"
-                          }`}
+                          className={`flex items-center justify-between p-2 px-3 border rounded-lg ${
+                            isTouchDevice && isActive
+                              ? isDarkMode
+                                ? "bg-gray-800/20"
+                                : "bg-gray-200/30"
+                              : ""
+                          } ${
+                            !isTouchDevice
+                              ? "hover:bg-gray-200/30 dark:hover:bg-gray-800/20"
+                              : ""
+                          } border-gray-500/10 dark:border-gray-700/10`}
+                          onTouchStart={() =>
+                            isTouchDevice && setActiveTransaction(transaction.id)
+                          }
+                          onTouchEnd={() =>
+                            isTouchDevice && setActiveTransaction(null)
+                          }
                         >
                           <div className="flex items-center space-x-3">
                             <Icon
@@ -332,7 +346,6 @@ export const SavingsAccount: React.FC = () => {
                             <button
                               onClick={() => handleDelete(transaction.id)}
                               className="text-blue-500 hover:text-blue-700"
-                              aria-label="Eliminar movimiento"
                             >
                               <Trash className="h-5 w-5" />
                             </button>

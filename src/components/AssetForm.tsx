@@ -2,48 +2,7 @@ import React, { useState } from "react";
 import { usePortfolio } from "../context/PortfolioContext";
 import { useTheme } from "../context/ThemeContext";
 import { Search, X } from "lucide-react";
-
-const cryptoAssets = [
-  { id: "BTC", name: "Bitcoin", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg" },
-  { id: "ETH", name: "Ethereum", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg" },
-  { id: "SOL", name: "Solana", url: "https://cryptologos.cc/logos/thumbs/solana.png?v=034" },
-  { id: "ADA", name: "Cardano", url: "https://cdn.simpleicons.org/cardano/[COLOR]" },
-  { id: "XRP", name: "Ripple", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/xrp.svg" },
-  { id: "HBAR", name: "Hedera", url: "https://cdn-icons-png.flaticon.com/512/14446/14446161.png" },
-  { id: "DOT", name: "Polkadot", url: "https://s2.coinmarketcap.com/static/cloud/img/logo/polkadot/Polkadot_Logo_Animation_64x64.gif" },
-  { id: "XLM", name: "Stellar", url: "https://cdn.simpleicons.org/stellar/[COLOR]" },
-  { id: "ALGO", name: "Algorand", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/algo.svg" },
-  { id: "LTC", name: "Litecoin", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ltc.svg" },
-  { id: "LNK", name: "Chainlink", url: "https://cdn.simpleicons.org/chainlink/[COLOR]" },
-  { id: "POL", name: "Polygon", url: "https://cdn.simpleicons.org/polygon/[COLOR]" },
-  { id: "BCH", name: "Bitcoin Cash", url: "https://cdn.simpleicons.org/bitcoincash/[COLOR]" },
-  { id: "FTM", name: "Fantom", url: "https://cdn.simpleicons.org/fantom/[COLOR]" },
-  { id: "AVAX", name: "Avalanche", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/avax.svg" },
-  { id: "USDT", name: "Tether", url: "https://cdn.simpleicons.org/tether/[COLOR]" },
-  { id: "BNB", name: "BNB", url: "https://cdn.simpleicons.org/bnbchain/[COLOR]" },
-  { id: "DOGE", name: "Dogecoin", url: "https://cryptologos.cc/logos/thumbs/dogecoin.png?v=034" },
-  { id: "USDC", name: "USDC", url: "https://cryptologos.cc/logos/thumbs/usd-coin.png?v=034" },
-  { id: "TRX", name: "TRON", url: "https://cryptologos.cc/logos/thumbs/tron.png?v=034" },
-  { id: "TON", name: "Toncoin", url: "https://cryptologos.cc/logos/thumbs/toncoin.png?v=034" },
-  { id: "SHIB", name: "Shiba Inu", url: "https://cryptologos.cc/logos/thumbs/shiba-inu.png?v=034" },
-  { id: "SUI", name: "Sui", url: "https://cryptologos.cc/logos/thumbs/sui.png?v=034" },
-  { id: "NEAR", name: "NEAR Protocol", url: "https://cdn.simpleicons.org/near/6ce99e" },
-  { id: "UNI", name: "Uniswap", url: "https://cryptologos.cc/logos/thumbs/uniswap.png?v=034" },
-  { id: "AAVE", name: "Aave", url: "https://cdn-icons-png.flaticon.com/512/15208/15208113.png" },
-];
-
-
-const stockAssets = [
-  { id: "APC", name: "Apple", url: "https://cdn-icons-png.flaticon.com/512/179/179309.png" },
-  { id: "AMZ", name: "Amazon", url: "https://cdn.simpleicons.org/amazon/[COLOR]" },
-  { id: "FB2A", name: "Meta Platforms", url: "https://cdn.simpleicons.org/meta/[COLOR]" },
-  { id: "NKE", name: "Nike", url: "https://cdn.simpleicons.org/nike/cdd0d2" },
-  { id: "NVD", name: "NVIDIA", url: "https://cdn.simpleicons.org/nvidia/[COLOR]" },
-  { id: "TL0", name: "Tesla", url: "https://cdn.simpleicons.org/tesla/[COLOR]" },
-  { id: "CCC3", name: "Coca-Cola", url: "https://cdn.simpleicons.org/cocacola/[COLOR]" },
-  { id: "MIGA", name: "MicroStrategy", url: "https://cdn.simpleicons.org/microstrategy/[COLOR]" },
-  { id: "2PP", name: "PayPal", url: "https://cdn.simpleicons.org/paypal/[COLOR]" },
-];
+import { cryptoAssets, stockAssets } from "../data/assets";
 
 export const AssetForm: React.FC = () => {
   const { addTransaction } = usePortfolio();
@@ -79,7 +38,7 @@ export const AssetForm: React.FC = () => {
       type: formData.operation === "buy" ? "compra" : "venta",
       amount,
       date: formData.date,
-      assetId: formData.assetId,
+      assetId: formData.assetId, // assetId determina el activo
     });
 
     setShowAlert(true);
