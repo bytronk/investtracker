@@ -65,161 +65,167 @@ export const AssetForm: React.FC = () => {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div
-      className={`rounded-lg shadow-md p-6 backdrop-blur-sm ${
-        isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
-      }`}
-    >
-      <h2 className="text-xl font-semibold mb-4">Registrar operación</h2>
+    <>
       {showAlert && (
         <div
-          className={`rounded-lg p-4 mb-4 ${
-            isDarkMode
-              ? "bg-green-600 text-white"
-              : "bg-green-100 text-green-800"
-          }`}
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
         >
-          ¡Operación registrada con éxito!
+          <div
+            className={`rounded-lg p-4 ${
+              isDarkMode
+                ? "bg-green-600 text-white"
+                : "bg-green-100 text-green-800"
+            }`}
+          >
+            ¡Operación registrada con éxito!
+          </div>
         </div>
       )}
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      <div
+        className={`rounded-lg shadow-md p-6 backdrop-blur-sm ${
+          isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
+        }`}
       >
-        {/* Operación */}
-        <select
-          value={formData.operation}
-          onChange={(e) =>
-            setFormData({ ...formData, operation: e.target.value as "buy" | "sell" })
-          }
-          className={`p-2 border rounded-md w-full ${
-            isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/10 text-gray-900 border-gray-500/10"
-          }`}
+        <h2 className="text-xl font-semibold mb-4">Registrar operación</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
-          <option value="buy">Compra</option>
-          <option value="sell">Venta</option>
-        </select>
+          {/* Operación */}
+          <select
+            value={formData.operation}
+            onChange={(e) =>
+              setFormData({ ...formData, operation: e.target.value as "buy" | "sell" })
+            }
+            className={`p-2 border rounded-md w-full ${
+              isDarkMode
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/10 text-gray-900 border-gray-500/10"
+            }`}
+          >
+            <option value="buy">Compra</option>
+            <option value="sell">Venta</option>
+          </select>
 
-        {/* Tipo */}
-        <select
-          value={formData.type}
-          onChange={(e) =>
-            setFormData({ ...formData, type: e.target.value as "crypto" | "stock", assetId: "" })
-          }
-          className={`p-2 border rounded-md w-full ${
-            isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/10 text-gray-900 border-gray-500/10"
-          }`}
-        >
-          <option value="crypto">Criptomonedas</option>
-          <option value="stock">Acciones</option>
-        </select>
+          {/* Tipo */}
+          <select
+            value={formData.type}
+            onChange={(e) =>
+              setFormData({ ...formData, type: e.target.value as "crypto" | "stock", assetId: "" })
+            }
+            className={`p-2 border rounded-md w-full ${
+              isDarkMode
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/10 text-gray-900 border-gray-500/10"
+            }`}
+          >
+            <option value="crypto">Criptomonedas</option>
+            <option value="stock">Acciones</option>
+          </select>
 
-        {/* Lista de activos con búsqueda */}
-        <div
-          className={`col-span-1 md:col-span-2 border rounded-md p-2 space-y-2 ${
-            isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/5 text-gray-900 border-gray-500/10"
-          }`}
-        >
-          <div className="relative">
-            <Search
-              className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
-                isFocused ? "text-blue-500" : isDarkMode ? "text-gray-400" : "text-gray-500"
-              }`}
-            />
-            <input
-              type="text"
-              placeholder="Buscar"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              className={`pl-3 p-2 border rounded-md w-full ${
-                isDarkMode
-                  ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-                  : "bg-gray-50/5 text-gray-900 border-gray-500/10"
-              }`}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+          {/* Lista de activos con búsqueda */}
+          <div
+            className={`col-span-1 md:col-span-2 border rounded-md p-2 space-y-2 ${
+              isDarkMode
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/5 text-gray-900 border-gray-500/10"
+            }`}
+          >
+            <div className="relative">
+              <Search
+                className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
                   isFocused ? "text-blue-500" : isDarkMode ? "text-gray-400" : "text-gray-500"
                 }`}
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
-          <div className="max-h-40 overflow-y-auto space-y-1">
-            {filteredAssets.map((asset) => (
-              <div
-                key={asset.id}
-                className={`flex items-center p-2 rounded-md cursor-pointer ${
-                  formData.assetId === asset.id
-                    ? "bg-blue-500 text-white"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+              />
+              <input
+                type="text"
+                placeholder="Buscar"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                className={`pl-3 p-2 border rounded-md w-full ${
+                  isDarkMode
+                    ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                    : "bg-gray-50/5 text-gray-900 border-gray-500/10"
                 }`}
-                onClick={() =>
-                  setFormData({ ...formData, assetId: asset.id })
-                }
-              >
-                <img
-                  src={asset.url}
-                  alt={asset.name}
-                  className="w-6 h-6 mr-3"
-                />
-                <span>{asset.name} ({asset.id})</span>
-              </div>
-            ))}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                    isFocused ? "text-blue-500" : isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+            <div className="max-h-40 overflow-y-auto space-y-1">
+              {filteredAssets.map((asset) => (
+                <div
+                  key={asset.id}
+                  className={`flex items-center p-2 rounded-md cursor-pointer ${
+                    formData.assetId === asset.id
+                      ? "bg-blue-500 text-white"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
+                  onClick={() =>
+                    setFormData({ ...formData, assetId: asset.id })
+                  }
+                >
+                  <img
+                    src={asset.url}
+                    alt={asset.name}
+                    className="w-6 h-6 mr-3"
+                  />
+                  <span>{asset.name} ({asset.id})</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Importe */}
-        <input
-          type="number"
-          value={formData.amount}
-          onChange={(e) =>
-            setFormData({ ...formData, amount: e.target.value })
-          }
-          className={`pl-2 p-2 border rounded-md w-full ${
-            isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/10 text-gray-900 border-gray-500/10"
-          }`}
-          placeholder="Importe (EUR)"
-          required
-        />
+          {/* Importe */}
+          <input
+            type="number"
+            value={formData.amount}
+            onChange={(e) =>
+              setFormData({ ...formData, amount: e.target.value })
+            }
+            className={`pl-2 p-2 border rounded-md w-full ${
+              isDarkMode
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/10 text-gray-900 border-gray-500/10"
+            }`}
+            placeholder="Importe (EUR)"
+            required
+          />
 
-        {/* Fecha */}
-        <input
-          type="date"
-          value={formData.date}
-          onChange={(e) =>
-            setFormData({ ...formData, date: e.target.value })
-          }
-          className={`p-2 border rounded-md w-full appearance-none ${
-            isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/10 text-gray-900 border-gray-500/10"
-          }`}
-          required
-        />
+          {/* Fecha */}
+          <input
+            type="date"
+            value={formData.date}
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+            className={`p-2 border rounded-md w-full appearance-none ${
+              isDarkMode
+                ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
+                : "bg-gray-50/10 text-gray-900 border-gray-500/10"
+            }`}
+            required
+          />
 
-        {/* Botón */}
-        <button
-          type="submit"
-          className="col-span-1 md:col-span-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 transition duration-200"
-        >
-          Registrar
-        </button>
-      </form>
-    </div>
+          {/* Botón */}
+          <button
+            type="submit"
+            className="col-span-1 md:col-span-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 transition duration-200"
+          >
+            Registrar
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
