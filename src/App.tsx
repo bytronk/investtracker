@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { PortfolioProvider } from "./context/PortfolioContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -54,6 +56,7 @@ function App() {
                 }
               />
             </Routes>
+            <ToastContainer />
           </BrowserRouter>
         </PortfolioProvider>
       </AuthProvider>

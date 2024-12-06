@@ -11,6 +11,7 @@ export interface Asset {
   symbol: string; // Símbolo del activo (por ejemplo, BTC para Bitcoin)
   type: "crypto" | "stock"; // Tipo de activo: cripto o acción
   totalInvested: number; // Total invertido en este activo
+  realizedProfit?: number; // Añadimos la propiedad opcional
 }
 
 // Representa una transacción relacionada con activos o cuenta remunerada

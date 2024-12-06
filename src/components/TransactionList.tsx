@@ -97,7 +97,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         >
           Transacciones{" "}
           <ChevronDown
-            className={`h-7 w-7 text-blue-500 transform transition-transform ${
+            className={`h-7 w-7 text-blue-500 mt-2 transform transition-transform ${
               showAllTransactions ? "rotate-180" : "rotate-0"
             }`}
           />
