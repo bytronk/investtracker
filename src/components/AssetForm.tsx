@@ -28,7 +28,7 @@ export const AssetForm: React.FC = () => {
 
   const toastStyle: ToastOptions = {
     position: "bottom-center",
-    autoClose: 1800,
+    autoClose: 2500,
     closeOnClick: true,
     pauseOnHover: false,
     draggable: true,

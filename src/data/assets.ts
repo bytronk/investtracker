@@ -39,4 +39,5 @@ export const stockAssets = [
   { id: "CCC3", name: "Coca-Cola", url: "https://cdn.simpleicons.org/cocacola/[COLOR]" },
   { id: "MIGA", name: "MicroStrategy", url: "https://cdn.simpleicons.org/microstrategy/[COLOR]" },
   { id: "2PP", name: "PayPal", url: "https://cdn.simpleicons.org/paypal/[COLOR]" },
+  { id: "BAKA", name: "Bankinter", url: "src/image/Bankinter Icon Logo.svg" },
 ];

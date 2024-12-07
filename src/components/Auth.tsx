@@ -44,7 +44,6 @@ export const Auth: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar campos antes de continuar
     if (!validateFields()) return;
 
     if (isLogin) {
