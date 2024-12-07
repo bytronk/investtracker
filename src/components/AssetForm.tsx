@@ -39,6 +39,7 @@ export const AssetForm: React.FC = () => {
       width: "92%",
       backgroundColor: isDarkMode ? "rgba(10, 12, 16)" : "rgba(251, 252, 252)",
       color: isDarkMode ? "#f3f4f6" : "#1f2937",
+      border: isDarkMode ? "1px solid rgba(20, 24, 28)" : "none",
     },
   };
 
@@ -246,7 +247,7 @@ export const AssetForm: React.FC = () => {
         {/* Botón */}
         <button
           type="submit"
-          className="col-span-1 md:col-span-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-500/80 transition duration-200"
+          className="col-span-1 md:col-span-2 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 transition duration-100"
         >
           Registrar
         </button>

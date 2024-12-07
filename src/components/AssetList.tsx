@@ -13,7 +13,7 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
 
   const assets = portfolio.assets.filter((asset) => asset.type === type);
 
-  const title = type === "crypto" ? "Criptomonedas" : "Acciones";
+  const title = type === "crypto" ? "Cartera de Criptomonedas" : "Cartera de Acciones";
   const emptyMessage =
     type === "crypto"
       ? "No hay criptomonedas registradas"
@@ -39,14 +39,14 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
       >
         <h2 className="text-xl font-semibold mb-3">{title}</h2>
         <ChevronDown
-          className={`h-7 w-7 text-blue-500 transform transition-transform mb-1 ${
+          className={`h-7 w-7 text-blue-500 transform transition-transform mb-1 -mr-2 ${
             isExpanded ? "rotate-180" : "rotate-0"
           }`}
         />
       </div>
       <div
         className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          isExpanded ? "max-h-[4000px]" : "max-h-[258px]"
+          isExpanded ? "max-h-[4000px]" : "max-h-[262px]"
         }`}
       >
         <div className="space-y-6 mt-4">
@@ -84,8 +84,8 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col items-center">
-                  <p className="font-medium text-right">
+                <div className="flex flex-col items-end">
+                  <p className="font-medium">
                     {new Intl.NumberFormat("es-ES", {
                       style: "currency",
                       currency: "EUR",

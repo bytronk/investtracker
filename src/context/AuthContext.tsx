@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "../types";
+import { toast, ToastOptions } from "react-toastify"; // Importar Toastify
+import "react-toastify/dist/ReactToastify.css"; // Estilos de Toastify
+import { useTheme } from "./ThemeContext"; // Importar el contexto de tema
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const { isDarkMode } = useTheme(); // Usar el estado del tema
 
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
@@ -22,14 +26,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const toastStyle: ToastOptions = {
+    position: "bottom-center",
+    autoClose: 2500,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: true,
+    style: {
+      bottom: "25px",
+      margin: "0 auto",
+      borderRadius: "3px",
+      width: "92%",
+      backgroundColor: isDarkMode ? "rgba(10, 12, 16)" : "rgba(251, 252, 252)",
+      color: isDarkMode ? "#f3f4f6" : "#1f2937",
+      border: isDarkMode ? "1px solid rgba(20, 24, 28)" : "none",
+    },
+  };
+
+  const validateFields = (email: string, password: string) => {
+    if (!email) {
+      toast.error("El campo de correo electrónico no puede estar vacío.", toastStyle);
+      return false;
+    }
+    if (!password) {
+      toast.error("El campo de contraseña no puede estar vacío.", toastStyle);
+      return false;
+    }
+    return true;
+  };
+
   const login = (email: string, password: string, remember: boolean) => {
+    if (!validateFields(email, password)) return;
+
     const users = JSON.parse(localStorage.getItem("users") || "{}");
     if (!users[email]) {
-      alert("El usuario no existe. Por favor, regístrate primero.");
+      toast.error("El usuario no existe. Por favor, regístrate primero.", toastStyle);
       return;
     }
     if (users[email].password !== password) {
-      alert("Contraseña incorrecta.");
+      toast.error("Contraseña incorrecta.", toastStyle);
       return;
     }
 
@@ -39,12 +74,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (remember) {
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
     }
+    toast.success("Inicio de sesión.", toastStyle);
   };
 
   const register = (email: string, password: string) => {
+    if (!validateFields(email, password)) return;
+
     const users = JSON.parse(localStorage.getItem("users") || "{}");
     if (users[email]) {
-      alert("El usuario ya está registrado.");
+      toast.error("El usuario ya está registrado.", toastStyle);
       return;
     }
 
@@ -55,13 +93,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const currentUser = { id: newUser.id, email };
     setUser(currentUser);
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
-    alert("Registro exitoso.");
+    toast.success("Registro exitoso.", toastStyle);
+    toast.success("Inicio de sesión.", toastStyle);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("currentUser");
-    alert("Se ha cerrado la sesión.");
+    toast.warn("Se ha cerrado la sesión.", toastStyle); // Usar el estilo dinámico
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TrendingUp, PiggyBank, Percent, DollarSign } from "lucide-react";
+import { TrendingUp, Percent, DollarSign, HandCoins } from "lucide-react";
 import { usePortfolio } from "../context/PortfolioContext";
 import { useTheme } from "../context/ThemeContext";
 import { Transaction } from "../types";
@@ -111,24 +111,32 @@ export const SavingsAccount: React.FC = () => {
             value: totals.patrimonio,
             icon: TrendingUp,
             color: "bg-blue-500",
+            textColor: "text-blue-500",
+            borderColor: "border-blue-500",
           },
           {
             title: "Disponible",
             value: portfolio.savingsAccount,
-            icon: PiggyBank,
+            icon: HandCoins,
             color: "bg-green-500",
+            textColor: "text-green-500",
+            borderColor: "border-green-500",
           },
           {
             title: "Intereses",
             value: totalInterest,
             icon: Percent,
             color: "bg-yellow-500",
+            textColor: "text-yellow-500",
+            borderColor: "border-yellow-500",
           },
           {
             title: "Dividendos",
             value: totalDividends,
             icon: DollarSign,
             color: "bg-purple-500",
+            textColor: "text-purple-500",
+            borderColor: "border-purple-500",
           },
         ].map((card, index) => (
           <div
@@ -151,9 +159,9 @@ export const SavingsAccount: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold">{card.title}</h3>
               <div
-                className={`${card.color} text-white p-1.5 rounded-full flex items-center justify-center`}
+                className={`${card.borderColor} border border-dashed p-1.5 rounded-full flex items-center justify-center`}
               >
-                <card.icon className="h-5 w-5" />
+                <card.icon className={`h-5 w-5 ${card.textColor}`} />
               </div>
             </div>
             <p className="text-2xl font-bold">
