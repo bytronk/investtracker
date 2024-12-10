@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TrendingUp, Percent, DollarSign, HandCoins } from "lucide-react";
+import { TrendingUp, Percent, DollarSign, Receipt } from "lucide-react";
 import { usePortfolio } from "../context/PortfolioContext";
 import { useTheme } from "../context/ThemeContext";
 import { Transaction } from "../types";
@@ -11,7 +11,6 @@ export const SavingsAccount: React.FC = () => {
   const { isDarkMode } = useTheme();
   const [activeCard, setActiveCard] = useState<string | null>(null);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Detectar si el dispositivo es táctil
@@ -30,8 +29,7 @@ export const SavingsAccount: React.FC = () => {
     date: string
   ) => {
     addTransaction({ type, amount, date });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 3000);
+    // Eliminada la alerta aquí
   };
 
   const sortedTransactions = [...portfolio.transactions].sort(
@@ -117,7 +115,7 @@ export const SavingsAccount: React.FC = () => {
           {
             title: "Disponible",
             value: portfolio.savingsAccount,
-            icon: HandCoins,
+            icon: Receipt,
             color: "bg-green-500",
             textColor: "text-green-500",
             borderColor: "border-green-500",
@@ -186,11 +184,7 @@ export const SavingsAccount: React.FC = () => {
       />
 
       {/* Formulario de Registro */}
-      <TransactionForm
-        onSubmit={handleSubmitTransaction}
-        showAlert={showAlert}
-        setShowAlert={setShowAlert}
-      />
+      <TransactionForm onSubmit={handleSubmitTransaction} />
     </div>
   );
 };

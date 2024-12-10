@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { ChevronDown, TrendingDown } from "lucide-react";
 import { usePortfolio } from "../context/PortfolioContext";
 import { cryptoAssets, stockAssets } from "../data/assets";
@@ -10,6 +10,7 @@ interface AssetListProps {
 export const AssetList: React.FC<AssetListProps> = ({ type }) => {
   const { portfolio } = usePortfolio();
   const [isExpanded, setIsExpanded] = useState(false);
+  const headerRef = useRef<HTMLDivElement | null>(null); // Ref para el encabezado
 
   const assets = portfolio.assets.filter((asset) => asset.type === type);
 
@@ -26,6 +27,16 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
 
   const toggleExpand = () => {
     setIsExpanded((prev) => !prev);
+
+    if (!isExpanded && headerRef.current) {
+      const headerOffset = headerRef.current.getBoundingClientRect().top; // Posición relativa al viewport
+      const scrollOffset = window.scrollY + headerOffset - 70; // Ajustar el margen superior (70px como ejemplo)
+
+      window.scrollTo({
+        top: scrollOffset,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
@@ -34,6 +45,7 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
       bg-white/70 dark:bg-gray-800/30 text-gray-900 dark:text-gray-100"
     >
       <div
+        ref={headerRef} // Referencia al encabezado
         className="flex items-center justify-between cursor-pointer"
         onClick={toggleExpand}
       >

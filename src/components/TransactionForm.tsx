@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { usePortfolio } from "../context/PortfolioContext"; // Importar el contexto del portafolio
 import { Transaction } from "../types";
 import { toast, ToastOptions } from "react-toastify";
 
@@ -11,6 +12,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   onSubmit,
 }) => {
   const { isDarkMode } = useTheme();
+  const { portfolio } = usePortfolio(); // Acceder al portafolio y savingsAccount
   const [formData, setFormData] = useState({
     type: "ingreso" as Transaction["type"],
     amount: "",
@@ -44,6 +46,15 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       return;
     }
 
+    // Validar que no se pueda retirar más del saldo disponible
+    if (formData.type === "retiro" && amount > portfolio.savingsAccount) {
+      toast.error(
+        "Efectivo insuficiente. Por favor, registre un ingreso.",
+        toastStyle
+      );
+      return;
+    }
+
     onSubmit(formData.type, amount, formData.date);
 
     toast.success("¡Transacción registrada con éxito!", toastStyle);
@@ -70,7 +81,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         <select
           value={formData.type}
           onChange={(e) =>
-            setFormData({ ...formData, type: e.target.value as Transaction["type"] })
+            setFormData({
+              ...formData,
+              type: e.target.value as Transaction["type"],
+            })
           }
           className={`p-2 border rounded-md appearance-none ${
             isDarkMode
@@ -84,10 +98,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           <option value="retiro">Retiro</option>
         </select>
         <input
-          type="number" // Cambia a texto para evitar validaciones predeterminadas
+          type="number"
           value={formData.amount}
           onChange={(e) => {
-            // Validar entrada numérica manualmente
             const value = e.target.value;
             if (!isNaN(Number(value)) || value === "") {
               setFormData({ ...formData, amount: value });

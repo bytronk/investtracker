@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Wallet, HandCoins, LogOut, Sun, Moon } from "lucide-react";
+import { Wallet, Receipt, LogOut, Sun, Moon } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
@@ -48,7 +48,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     : "hover:text-blue-400"
                 }`}
               >
-                <HandCoins className="h-6 w-6 mr-2" />
+                <Receipt className="h-6 w-6 mr-2" />
                 <span className="font-medium">Efectivo</span>
                 <span
                   className={`absolute bottom-[-8px] left-0 w-full h-[2.5px] bg-blue-500 transition-all duration-400 ease-in-out rounded-full ${
