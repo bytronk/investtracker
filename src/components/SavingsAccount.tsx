@@ -10,7 +10,6 @@ export const SavingsAccount: React.FC = () => {
   const { portfolio, addTransaction, deleteTransaction } = usePortfolio(); // Asegúrate de que deleteTransaction está disponible
   const { isDarkMode } = useTheme();
   const [activeCard, setActiveCard] = useState<string | null>(null);
-  const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Detectar si el dispositivo es táctil
@@ -177,8 +176,6 @@ export const SavingsAccount: React.FC = () => {
         transactions={groupedByMonth}
         currentMonthKey={currentMonthKey}
         previousMonthKey={previousMonthKey}
-        showAllTransactions={showAllTransactions}
-        setShowAllTransactions={setShowAllTransactions}
         handleDelete={deleteTransaction}
         formatDate={formatDate}
       />

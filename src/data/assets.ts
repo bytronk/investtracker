@@ -1,5 +1,3 @@
-// src/data/assets.ts
-
 export const cryptoAssets = [
   { id: "BTC", name: "Bitcoin", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg" },
   { id: "ETH", name: "Ethereum", url: "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg" },
