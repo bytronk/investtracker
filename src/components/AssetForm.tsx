@@ -211,7 +211,7 @@ export const AssetForm: React.FC = () => {
                   className="w-6 h-6 mr-3"
                 />
                 <span>
-                  {asset.name} ({asset.id})
+                  {asset.name} <span className="text-sm text-gray-500 dark:text-gray-400">({asset.id})</span>
                 </span>
               </div>
             ))}

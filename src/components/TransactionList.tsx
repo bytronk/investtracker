@@ -152,7 +152,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         className="flex items-center justify-between cursor-pointer"
         onClick={toggleExpand}
       >
-        <h2 className="text-xl font-semibold mb-3">Lista de Transacciones</h2>
+        <h2 className="text-xl font-semibold mb-3">Transacciones</h2>
         <ChevronDown
           className={`h-7 w-7 text-blue-500 transform transition-transform mb-1 -mr-2 ${
             isExpanded ? "rotate-180" : "rotate-0"
@@ -190,7 +190,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                         {["compra", "venta", "dividendo"].includes(
                           transaction.type
                         ) && (
-                          <span className="text-gray-400">
+                          <span className="text-gray-400 capitalize">
                             · {transaction.type}
                           </span>
                         )}
@@ -199,7 +199,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                   </div>
                   <div className="flex flex-col items-end">
                     <p
-                      className={`font-medium ${
+                      className={`font-medium text-[0.920rem] ${
                         ["ingreso", "interes", "dividendo", "venta"].includes(
                           transaction.type
                         )

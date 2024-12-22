@@ -97,7 +97,7 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <p className="font-medium">
+                  <p className="font-medium text-[0.920rem]">
                     {new Intl.NumberFormat("es-ES", {
                       style: "currency",
                       currency: "EUR",
