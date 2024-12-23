@@ -109,7 +109,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   };
 
   const getTransactionIcon = (transaction: Transaction) => {
-    if (["compra", "venta"].includes(transaction.type) && transaction.assetId) {
+    if (transaction.assetId) {
       const asset =
         cryptoAssets.find((asset) => asset.id === transaction.assetId) ||
         stockAssets.find((asset) => asset.id === transaction.assetId);
@@ -120,20 +120,28 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 
     switch (transaction.type) {
       case "ingreso":
-        return <ArrowUpCircle className="h-[1.7rem] w-[1.7rem] text-green-500" />;
+        return (
+          <ArrowUpCircle className="h-[1.7rem] w-[1.7rem] text-green-500" />
+        );
       case "interes":
-        return <Percent className="h-6 w-6 p-1 text-yellow-500 border border-yellow-500 rounded-full" />;
+        return (
+          <Percent className="h-6 w-6 p-1 text-yellow-500 border border-yellow-500 rounded-full" />
+        );
       case "dividendo":
-        return <DollarSign className="h-6 w-6 p-1 text-purple-500  border border-purple-500 rounded-full" />;
+        return (
+          <DollarSign className="h-6 w-6 p-1 text-purple-500 border border-purple-500 rounded-full" />
+        );
       case "retiro":
-        return <ArrowDownCircle className="h-[1.7rem] w-[1.7rem] text-red-500" />;
+        return (
+          <ArrowDownCircle className="h-[1.7rem] w-[1.7rem] text-red-500" />
+        );
       default:
         return <DollarSign className="h-6 w-6 text-gray-500" />;
     }
   };
 
   const getTransactionName = (transaction: Transaction) => {
-    if (["compra", "venta"].includes(transaction.type) && transaction.assetId) {
+    if (transaction.assetId) {
       const asset =
         cryptoAssets.find((asset) => asset.id === transaction.assetId) ||
         stockAssets.find((asset) => asset.id === transaction.assetId);

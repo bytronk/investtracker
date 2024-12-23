@@ -25,9 +25,10 @@ export const SavingsAccount: React.FC = () => {
   const handleSubmitTransaction = (
     type: Transaction["type"],
     amount: number,
-    date: string
+    date: string,
+    assetId?: string
   ) => {
-    addTransaction({ type, amount, date });
+    addTransaction({ type, amount, date, assetId });
     // Eliminada la alerta aquí
   };
 

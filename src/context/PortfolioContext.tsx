@@ -109,10 +109,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       ...transaction,
       id: Date.now().toString(),
       date: transaction.date || new Date().toISOString(),
+      assetId: transaction.assetId, // Asegurarse de que assetId se incluya
     };
-
+  
     let newSavingsAccount = portfolio.savingsAccount;
-
+  
     if (transaction.type === "compra") {
       newSavingsAccount -= transaction.amount;
       const assetType = determineAssetType(transaction.assetId || "");
@@ -121,12 +122,15 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       newSavingsAccount += transaction.amount;
       const assetType = determineAssetType(transaction.assetId || "");
       updateAsset(transaction.assetId || "", -transaction.amount, assetType);
-    } else if (["ingreso", "interes", "dividendo"].includes(transaction.type)) {
+    } else if (transaction.type === "dividendo" && transaction.assetId) {
+      newSavingsAccount += transaction.amount;
+      // No es necesario actualizar el activo en este caso, ya que no afecta su inversión.
+    } else if (["ingreso", "interes"].includes(transaction.type)) {
       newSavingsAccount += transaction.amount;
     } else if (transaction.type === "retiro") {
       newSavingsAccount -= transaction.amount;
     }
-
+  
     const newPortfolio = {
       ...portfolio,
       transactions: [newTransaction, ...portfolio.transactions],

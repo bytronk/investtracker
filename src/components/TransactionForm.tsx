@@ -91,7 +91,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   }, [formData.type]);
 
   const purchasedStocks = portfolio.transactions
-    .filter((transaction) => transaction.type === "compra" && transaction.assetId)
+    .filter(
+      (transaction) => transaction.type === "compra" && transaction.assetId
+    )
     .map((transaction) =>
       stockAssets.find((asset) => asset.id === transaction.assetId)
     )
@@ -127,16 +129,17 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
                   selectedStock === stock?.id ? "bg-blue-500 text-white" : ""
                 }`}
                 onClick={() =>
-                  setSelectedStock((prev) => (prev === stock?.id ? null : stock?.id))
+                  setSelectedStock((prev) =>
+                    prev === stock?.id ? null : stock?.id
+                  )
                 }
               >
-                <img
-                  src={stock?.url}
-                  alt={stock?.name}
-                  className="w-6 h-6"
-                />
+                <img src={stock?.url} alt={stock?.name} className="w-6 h-6" />
                 <p className="text-sm font-medium">
-                  {stock?.name} <span className="text-sm text-gray-500 dark:text-gray-400">({stock?.id})</span>
+                  {stock?.name}{" "}
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    ({stock?.id})
+                  </span>
                 </p>
               </div>
             ))}
