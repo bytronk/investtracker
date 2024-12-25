@@ -9,7 +9,8 @@ interface PortfolioContextType {
     symbol: string,
     amount: number,
     type: "crypto" | "stock",
-    isLoss?: boolean // Parámetro opcional para manejar pérdidas
+    isLoss?: boolean, // Parámetro opcional para manejar pérdidas
+    forceDelete?: boolean // Parámetro opcional para forzar eliminación
   ) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => void;
@@ -62,7 +63,8 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     symbol: string,
     amount: number,
     type: "crypto" | "stock",
-    isLoss: boolean = false
+    isLoss: boolean = false,
+    forceDelete: boolean = false
   ) => {
     const assetIndex = portfolio.assets.findIndex(
       (asset) => asset.symbol === symbol && asset.type === type
@@ -72,7 +74,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       const currentAsset = portfolio.assets[assetIndex];
       let newRealizedProfit = currentAsset.realizedProfit ?? 0;
   
-      if (isLoss) {
+      if (forceDelete) {
+        portfolio.assets.splice(assetIndex, 1); // Eliminar activo forzado
+      } else if (isLoss) {
         // Declarar pérdida
         newRealizedProfit -= currentAsset.totalInvested;
         portfolio.assets[assetIndex] = {
@@ -80,6 +84,10 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
           totalInvested: 0,
           realizedProfit: newRealizedProfit,
         };
+  
+        if (newRealizedProfit === 0) {
+          portfolio.assets.splice(assetIndex, 1); // Eliminar si realizedProfit queda en 0
+        }
       } else {
         const newTotalInvested = currentAsset.totalInvested + amount;
         newRealizedProfit += Math.abs(Math.min(newTotalInvested, 0));
@@ -94,14 +102,25 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
           };
         }
       }
-    } else if (!isLoss && amount > 0) {
-      portfolio.assets.push({
-        id: Date.now().toString(),
-        symbol,
-        type,
-        totalInvested: amount,
-        realizedProfit: 0,
-      });
+    } else {
+      // Si el activo no existe en la lista
+      if (amount < 0) {
+        portfolio.assets.push({
+          id: Date.now().toString(),
+          symbol,
+          type,
+          totalInvested: 0,
+          realizedProfit: Math.abs(amount), // Registrar como realizedProfit
+        });
+      } else {
+        portfolio.assets.push({
+          id: Date.now().toString(),
+          symbol,
+          type,
+          totalInvested: amount,
+          realizedProfit: 0,
+        });
+      }
     }
   
     savePortfolio({ ...portfolio });

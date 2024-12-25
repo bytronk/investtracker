@@ -69,6 +69,49 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
 
     setIsAlertActive(true);
 
+    if (totalInvested === 0) {
+      const toastId = toast.warning(
+        <div className="flex flex-col items-center space-y-4">
+          <p className="text-sm md:text-base text-center">
+            ¿Quieres eliminar este activo de la lista?
+          </p>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => {
+                toast.dismiss(toastId);
+                setIsAlertActive(false);
+              }}
+              className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => {
+                updateAsset(assetId, 0, type, false, true); // Forzar eliminación
+                toast.dismiss(toastId);
+                toast.success("Activo eliminado correctamente.", {
+                  position: "bottom-center",
+                  autoClose: 2500,
+                  style: toastStyle.style,
+                  pauseOnHover: false,
+                  closeOnClick: true,
+                });
+                setIsAlertActive(false);
+              }}
+              className="bg-red-600 text-white px-2 py-1 text-sm rounded hover:bg-red-700 transition"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>,
+        {
+          ...toastStyle,
+          onClose: () => setIsAlertActive(false),
+        }
+      );
+      return;
+    }
+
     const toastId = toast.error(
       <div className="flex flex-col items-center space-y-4">
         <p className="text-sm md:text-base text-center">
