@@ -5,7 +5,7 @@ import {
   Percent,
   DollarSign,
   ChevronDown,
-  Trash,
+  CircleEllipsis
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { Transaction } from "../types";
@@ -169,7 +169,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       </div>
       <div
         className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          isExpanded ? "max-h-[4000px]" : "max-h-[262px]"
+          isExpanded ? "max-h-[10000px]" : "max-h-[308px]"
         }`}
       >
         <div className="space-y-6 mt-4">
@@ -185,7 +185,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               {transactionList.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-2 px-0 rounded-lg"
+                  className="flex items-center justify-between p-2 px-0 rounded-lg mt-3"
                 >
                   <div className="flex items-center space-x-4">
                     {getTransactionIcon(transaction)}
@@ -193,7 +193,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                       <p className="font-medium capitalize">
                         {getTransactionName(transaction)}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {formatDate(transaction.date)}{" "}
                         {["compra", "venta", "dividendo"].includes(
                           transaction.type
@@ -218,8 +218,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                       {["ingreso", "interes", "dividendo", "venta"].includes(
                         transaction.type
                       )
-                        ? "+"
-                        : "-"}
+                        ? "+ "
+                        : "- "}
                       {new Intl.NumberFormat("es-ES", {
                         style: "currency",
                         currency: "EUR",
@@ -231,7 +231,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                         confirmAndDeleteTransaction(transaction.id)
                       }
                     >
-                      <Trash className="h-5 w-4" />
+                      <CircleEllipsis className="h-5 w-4" />
                     </button>
                   </div>
                 </div>

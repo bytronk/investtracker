@@ -1,20 +1,25 @@
 import React, { useState, useRef } from "react";
-import { ChevronDown, TrendingDown } from "lucide-react";
+import { ChevronDown, CircleEllipsis } from "lucide-react";
+import { toast, ToastOptions } from "react-toastify";
 import { usePortfolio } from "../context/PortfolioContext";
 import { cryptoAssets, stockAssets } from "../data/assets";
+import { useTheme } from "../context/ThemeContext"; // Importar ThemeContext
 
 interface AssetListProps {
   type: "crypto" | "stock";
 }
 
 export const AssetList: React.FC<AssetListProps> = ({ type }) => {
-  const { portfolio } = usePortfolio();
+  const { portfolio, updateAsset } = usePortfolio();
+  const { isDarkMode } = useTheme(); // Obtener el estado del tema
   const [isExpanded, setIsExpanded] = useState(false);
-  const headerRef = useRef<HTMLDivElement | null>(null); // Ref para el encabezado
+  const [isAlertActive, setIsAlertActive] = useState(false);
+  const headerRef = useRef<HTMLDivElement | null>(null);
 
   const assets = portfolio.assets.filter((asset) => asset.type === type);
 
-  const title = type === "crypto" ? "Cartera de Criptomonedas" : "Cartera de Acciones";
+  const title =
+    type === "crypto" ? "Cartera de Criptomonedas" : "Cartera de Acciones";
   const emptyMessage =
     type === "crypto"
       ? "No hay criptomonedas registradas"
@@ -25,12 +30,32 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
     return source.find((asset) => asset.id === symbol);
   };
 
+  const toastStyle: ToastOptions = {
+    position: "bottom-center",
+    autoClose: false,
+    closeOnClick: false,
+    pauseOnHover: false,
+    draggable: false,
+    style: {
+      margin: "0 auto",
+      borderRadius: "3px",
+      width: "92%",
+      backgroundColor: isDarkMode
+        ? "rgba(10, 12, 16, 0.95)" // Oscuro
+        : "rgba(251, 252, 252, 0.95)", // Claro
+      color: isDarkMode ? "#f3f4f6" : "#1f2937",
+      border: isDarkMode
+        ? "1px solid rgba(20, 24, 28)" // Oscuro
+        : "1px solid rgba(229, 231, 235)", // Claro
+    },
+  };
+
   const toggleExpand = () => {
     setIsExpanded((prev) => !prev);
 
     if (!isExpanded && headerRef.current) {
-      const headerOffset = headerRef.current.getBoundingClientRect().top; // Posición relativa al viewport
-      const scrollOffset = window.scrollY + headerOffset - 70; // Ajustar el margen superior (70px como ejemplo)
+      const headerOffset = headerRef.current.getBoundingClientRect().top;
+      const scrollOffset = window.scrollY + headerOffset - 70;
 
       window.scrollTo({
         top: scrollOffset,
@@ -39,13 +64,60 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
     }
   };
 
+  const handleDeclareLoss = (assetId: string, totalInvested: number) => {
+    if (isAlertActive) return;
+
+    setIsAlertActive(true);
+
+    const toastId = toast.error(
+      <div className="flex flex-col items-center space-y-4">
+        <p className="text-sm md:text-base text-center">
+          ¿Declaras como pérdidas realizadas el importe total de este activo?
+          Esta acción no se puede revertir.
+        </p>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => {
+              toast.dismiss(toastId);
+              setIsAlertActive(false);
+            }}
+            className="bg-gray-500 text-white px-2 py-1 text-sm rounded hover:bg-gray-600 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => {
+              updateAsset(assetId, totalInvested, type, true); // Declarar pérdida
+              toast.dismiss(toastId);
+              toast.success("Pérdidas declaradas con éxito.", {
+                position: "bottom-center",
+                autoClose: 2500,
+                style: toastStyle.style, // Aplicar estilo dinámico
+                pauseOnHover: false, // No pausar al pasar el mouse
+                closeOnClick: true, // Cerrar al tocar/click
+              });
+              setIsAlertActive(false);
+            }}
+            className="bg-red-600 text-white px-2 py-1 text-sm rounded hover:bg-red-700 transition"
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>,
+      {
+        ...toastStyle,
+        onClose: () => setIsAlertActive(false),
+      }
+    );
+  };
+
   return (
     <div
       className="rounded-lg shadow-md p-6 backdrop-blur-sm
       bg-white/70 dark:bg-gray-800/30 text-gray-900 dark:text-gray-100"
     >
       <div
-        ref={headerRef} // Referencia al encabezado
+        ref={headerRef}
         className="flex items-center justify-between cursor-pointer"
         onClick={toggleExpand}
       >
@@ -58,7 +130,7 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
       </div>
       <div
         className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          isExpanded ? "max-h-[4000px]" : "max-h-[262px]"
+          isExpanded ? "max-h-[10000px]" : "max-h-[269px]"
         }`}
       >
         <div className="space-y-6 mt-4">
@@ -93,6 +165,17 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
                             +{asset.realizedProfit.toLocaleString("es-ES")}€
                           </span>
                         )}
+                      {asset.realizedProfit === 0 && (
+                        <span className="text-gray-500">
+                          {asset.realizedProfit.toLocaleString("es-ES")}€
+                        </span>
+                      )}
+                      {asset.realizedProfit !== undefined &&
+                        asset.realizedProfit < 0 && (
+                          <span className="text-red-500">
+                            {asset.realizedProfit.toLocaleString("es-ES")}€
+                          </span>
+                        )}
                     </p>
                   </div>
                 </div>
@@ -106,8 +189,11 @@ export const AssetList: React.FC<AssetListProps> = ({ type }) => {
                   <button
                     className="text-blue-500 flex items-center justify-center hover:text-blue-400 transition duration-200"
                     title="Pérdidas"
+                    onClick={() =>
+                      handleDeclareLoss(asset.symbol, asset.totalInvested)
+                    }
                   >
-                    <TrendingDown className="h-5 w-6" />
+                    <CircleEllipsis className="w-4" />
                   </button>
                 </div>
               </div>

@@ -8,7 +8,8 @@ interface PortfolioContextType {
   updateAsset: (
     symbol: string,
     amount: number,
-    type: "crypto" | "stock"
+    type: "crypto" | "stock",
+    isLoss?: boolean // Parámetro opcional para manejar pérdidas
   ) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => void;
@@ -60,29 +61,40 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateAsset = (
     symbol: string,
     amount: number,
-    type: "crypto" | "stock"
+    type: "crypto" | "stock",
+    isLoss: boolean = false
   ) => {
     const assetIndex = portfolio.assets.findIndex(
       (asset) => asset.symbol === symbol && asset.type === type
     );
-
+  
     if (assetIndex !== -1) {
       const currentAsset = portfolio.assets[assetIndex];
-      const newTotalInvested = currentAsset.totalInvested + amount;
-      const newRealizedProfit =
-        (currentAsset.realizedProfit ?? 0) +
-        Math.abs(Math.min(newTotalInvested, 0));
-
-      if (newTotalInvested <= 0 && newRealizedProfit === 0) {
-        portfolio.assets.splice(assetIndex, 1);
-      } else {
+      let newRealizedProfit = currentAsset.realizedProfit ?? 0;
+  
+      if (isLoss) {
+        // Declarar pérdida
+        newRealizedProfit -= currentAsset.totalInvested;
         portfolio.assets[assetIndex] = {
           ...currentAsset,
-          totalInvested: Math.max(newTotalInvested, 0),
+          totalInvested: 0,
           realizedProfit: newRealizedProfit,
         };
+      } else {
+        const newTotalInvested = currentAsset.totalInvested + amount;
+        newRealizedProfit += Math.abs(Math.min(newTotalInvested, 0));
+  
+        if (newTotalInvested <= 0 && newRealizedProfit === 0) {
+          portfolio.assets.splice(assetIndex, 1);
+        } else {
+          portfolio.assets[assetIndex] = {
+            ...currentAsset,
+            totalInvested: Math.max(newTotalInvested, 0),
+            realizedProfit: newRealizedProfit,
+          };
+        }
       }
-    } else if (amount > 0) {
+    } else if (!isLoss && amount > 0) {
       portfolio.assets.push({
         id: Date.now().toString(),
         symbol,
@@ -90,30 +102,22 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
         totalInvested: amount,
         realizedProfit: 0,
       });
-    } else if (amount < 0) {
-      // Manejar el caso de venta sin compras previas
-      portfolio.assets.push({
-        id: Date.now().toString(),
-        symbol,
-        type,
-        totalInvested: 0,
-        realizedProfit: Math.abs(amount),
-      });
     }
-
+  
     savePortfolio({ ...portfolio });
   };
+  
 
   const addTransaction = (transaction: Omit<Transaction, "id">) => {
     const newTransaction = {
       ...transaction,
       id: Date.now().toString(),
       date: transaction.date || new Date().toISOString(),
-      assetId: transaction.assetId, // Asegurarse de que assetId se incluya
+      assetId: transaction.assetId,
     };
-  
+
     let newSavingsAccount = portfolio.savingsAccount;
-  
+
     if (transaction.type === "compra") {
       newSavingsAccount -= transaction.amount;
       const assetType = determineAssetType(transaction.assetId || "");
@@ -124,13 +128,12 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       updateAsset(transaction.assetId || "", -transaction.amount, assetType);
     } else if (transaction.type === "dividendo" && transaction.assetId) {
       newSavingsAccount += transaction.amount;
-      // No es necesario actualizar el activo en este caso, ya que no afecta su inversión.
     } else if (["ingreso", "interes"].includes(transaction.type)) {
       newSavingsAccount += transaction.amount;
     } else if (transaction.type === "retiro") {
       newSavingsAccount -= transaction.amount;
     }
-  
+
     const newPortfolio = {
       ...portfolio,
       transactions: [newTransaction, ...portfolio.transactions],
@@ -193,7 +196,6 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
           };
         }
       } else if (transactionToDelete.type === "venta") {
-        // Restaurar activo eliminado previamente
         const restoredType = determineAssetType(transactionToDelete.assetId!);
         portfolio.assets.push({
           id: Date.now().toString(),
