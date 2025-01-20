@@ -102,7 +102,9 @@ export const AssetForm: React.FC = () => {
   return (
     <div
       className={`rounded-lg shadow-md p-6 backdrop-blur-sm ${
-        isDarkMode ? "bg-gray-800/30 text-gray-100" : "bg-white/70 text-gray-900"
+        isDarkMode
+          ? "bg-gray-800/30 text-gray-100"
+          : "bg-white/70 text-gray-900"
       }`}
     >
       <h2 className="text-xl font-semibold mb-4">Registrar operación</h2>
@@ -176,8 +178,8 @@ export const AssetForm: React.FC = () => {
               onBlur={() => setIsFocused(false)}
               className={`pl-3 p-2 border rounded-md w-full ${
                 isDarkMode
-                  ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-                  : "bg-gray-50/5 text-gray-900 border-gray-500/10"
+                  ? "bg-gray-800/5 text-gray-100 border-gray-700/10 placeholder-gray-100"
+                  : "bg-gray-50/5 text-gray-900 border-gray-500/10 placeholder-gray-900"
               }`}
             />
             {searchQuery && (
@@ -201,7 +203,9 @@ export const AssetForm: React.FC = () => {
               <div
                 key={asset.id}
                 className={`flex items-center p-2 rounded-md cursor-pointer ${
-                  formData.assetId === asset.id ? "bg-blue-600 dark:bg-blue-500 text-white" : ""
+                  formData.assetId === asset.id
+                    ? "bg-blue-600 dark:bg-blue-500 text-white"
+                    : ""
                 }`}
                 onClick={() => setFormData({ ...formData, assetId: asset.id })}
               >
@@ -211,7 +215,10 @@ export const AssetForm: React.FC = () => {
                   className="w-6 h-6 mr-3"
                 />
                 <span>
-                  {asset.name} <span className="text-sm text-gray-500 dark:text-gray-400">({asset.id})</span>
+                  {asset.name}{" "}
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    ({asset.id})
+                  </span>
                 </span>
               </div>
             ))}
@@ -223,10 +230,10 @@ export const AssetForm: React.FC = () => {
           type="number"
           value={formData.amount}
           onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-          className={`pl-2 p-2 border rounded-md w-full ${
+          className={`pl-2 p-2 border rounded-md w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [appearance:textfield] ${
             isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/10 text-gray-900 border-gray-500/10"
+              ? "bg-gray-800/5 text-gray-100 border-gray-700/10 placeholder-gray-100"
+              : "bg-gray-50/10 text-gray-900 border-gray-500/10 placeholder-gray-900"
           }`}
           placeholder="Importe (EUR)"
         />

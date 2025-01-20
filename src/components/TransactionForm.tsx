@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { usePortfolio } from "../context/PortfolioContext"; // Importar el contexto del portafolio
+import { usePortfolio } from "../context/PortfolioContext";
 import { Transaction } from "../types";
 import { stockAssets } from "../data/assets";
 import { toast, ToastOptions } from "react-toastify";
@@ -18,7 +18,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   onSubmit,
 }) => {
   const { isDarkMode } = useTheme();
-  const { portfolio } = usePortfolio(); // Acceder al portafolio
+  const { portfolio } = usePortfolio();
   const [formData, setFormData] = useState({
     type: "ingreso" as Transaction["type"],
     amount: "",
@@ -48,13 +48,11 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     e.preventDefault();
     const amount = parseFloat(formData.amount);
 
-    // Validar manualmente el campo numérico
     if (!amount || amount <= 0) {
       toast.error("El importe debe ser mayor que 0.", toastStyle);
       return;
     }
 
-    // Validar que no se pueda retirar más del saldo disponible
     if (formData.type === "retiro" && amount > portfolio.savingsAccount) {
       toast.error(
         "Efectivo insuficiente. Por favor, registre un ingreso.",
@@ -63,7 +61,6 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       return;
     }
 
-    // Validar que se seleccione una acción para el tipo "dividendo"
     if (formData.type === "dividendo" && !selectedStock) {
       toast.error(
         "Debe seleccionar una acción para registrar un dividendo.",
@@ -90,14 +87,23 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     }
   }, [formData.type]);
 
-  const purchasedStocks = portfolio.transactions
-    .filter(
-      (transaction) => transaction.type === "compra" && transaction.assetId
-    )
-    .map((transaction) =>
-      stockAssets.find((asset) => asset.id === transaction.assetId)
-    )
-    .filter((asset) => asset !== undefined); // Filtrar activos válidos
+  const purchasedStocks = Object.values(
+    portfolio.transactions
+      .filter(
+        (transaction) =>
+          transaction.type === "compra" && transaction.assetId !== undefined
+      )
+      .reduce((uniqueStocks, transaction) => {
+        const assetId = transaction.assetId!;
+        if (!uniqueStocks[assetId]) {
+          const stock = stockAssets.find((asset) => asset.id === assetId);
+          if (stock) {
+            uniqueStocks[assetId] = stock;
+          }
+        }
+        return uniqueStocks;
+      }, {} as Record<string, { id: string; name: string; url: string }>)
+  ).sort((a, b) => a.name.localeCompare(b.name)); // Ordenar alfabéticamente por nombre
 
   return (
     <div
@@ -111,7 +117,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
       <h2 className="text-xl font-semibold mb-4">Registrar transacción</h2>
       <form
         onSubmit={handleSubmit}
-        noValidate // Desactiva validaciones predeterminadas del navegador
+        noValidate
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
         {formData.type === "dividendo" && purchasedStocks.length > 0 && (
@@ -124,21 +130,21 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           >
             {purchasedStocks.map((stock) => (
               <div
-                key={stock?.id}
+                key={stock.id}
                 className={`flex items-center space-x-3 p-2 rounded-md cursor-pointer ${
-                  selectedStock === stock?.id ? "bg-blue-500 text-white" : ""
+                  selectedStock === stock.id ? "bg-blue-500 text-white" : ""
                 }`}
                 onClick={() =>
                   setSelectedStock((prev) =>
-                    prev === stock?.id ? null : stock?.id
+                    prev === stock.id ? null : stock.id
                   )
                 }
               >
-                <img src={stock?.url} alt={stock?.name} className="w-6 h-6" />
+                <img src={stock.url} alt={stock.name} className="w-6 h-6" />
                 <p className="text-sm font-medium">
-                  {stock?.name}{" "}
+                  {stock.name}{" "}
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    ({stock?.id})
+                    ({stock.id})
                   </span>
                 </p>
               </div>
@@ -153,7 +159,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               ...formData,
               type: e.target.value as Transaction["type"],
             });
-            setSelectedStock(null); // Reiniciar selección al cambiar el tipo
+            setSelectedStock(null);
           }}
           className={`p-2 border rounded-md appearance-none ${
             isDarkMode
@@ -178,10 +184,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               toast.error("El importe debe ser un número válido.", toastStyle);
             }
           }}
-          className={`p-2 border rounded-md appearance-none ${
+          className={`p-2 border rounded-md [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [appearance:textfield] ${
             isDarkMode
-              ? "bg-gray-800/5 text-gray-100 border-gray-700/10"
-              : "bg-gray-50/5 border-gray-500/10"
+              ? "bg-gray-800/5 text-gray-100 border-gray-700/10 placeholder-gray-100"
+              : "bg-gray-50/5 border-gray-500/10 placeholder-gray-900"
           } text-center`}
           placeholder="Importe (EUR)"
         />
