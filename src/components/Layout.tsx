@@ -17,7 +17,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-black text-gray-800 dark:text-gray-200 overflow-x-hidden">
-      {/* Navegación fija con glassmorphism */}
+      {/* Navegacion fija con glassmorphism */}
       <nav className="fixed top-0 left-0 right-0 bg-white/20 dark:bg-gray-900/10 backdrop-blur-md border-b border-gray-300/20 dark:border-gray-600/20 shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16 items-center">
