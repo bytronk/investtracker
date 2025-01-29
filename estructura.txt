@@ -1,0 +1,63 @@
+.
+├── .DS_Store
+├── .env
+├── .gitignore
+├── _redirects
+├── backend
+│   ├── .env
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── prisma
+│   │   ├── migrations
+│   │   │   ├── 20250123200440_add_autoincrement_to_users
+│   │   │   └── migration_lock.toml
+│   │   └── schema.prisma
+│   └── server.js
+├── dist
+│   ├── _redirects
+│   ├── assets
+│   │   ├── index-BsvAOVVT.css
+│   │   └── index-CImt1M6P.js
+│   └── index.html
+├── eslint.config.js
+├── estructura.txt
+├── index.html
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── public
+│   ├── .DS_Store
+│   ├── apple-touch-icon.png
+│   ├── favicon.svg
+│   └── image
+│       └── bankinterIcon.svg
+├── src
+│   ├── .DS_Store
+│   ├── App.tsx
+│   ├── components
+│   │   ├── AssetForm.tsx
+│   │   ├── AssetList.tsx
+│   │   ├── Auth.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── Layout.tsx
+│   │   ├── SavingsAccount.tsx
+│   │   ├── TransactionForm.tsx
+│   │   └── TransactionList.tsx
+│   ├── context
+│   │   ├── AuthContext.tsx
+│   │   ├── PortfolioContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── data
+│   │   ├── .DS_Store
+│   │   └── assets.ts
+│   ├── index.css
+│   ├── main.tsx
+│   ├── types.ts
+│   └── vite-env.d.ts
+├── tailwind.config.js
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+13 directories, 48 files

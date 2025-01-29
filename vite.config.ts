@@ -10,11 +10,18 @@ export default defineConfig({
       targets: [
         {
           src: "_redirects", // Archivo en la raíz del proyecto
-          dest: ".",         // Copiarlo a la raíz de la carpeta dist
+          dest: ".", // Copiarlo a la raíz de la carpeta dist
         },
       ],
     }),
   ],
+  server: {
+    port: 5173,
+    host: "0.0.0.0", // Permitir conexiones externas
+  },
+  define: {
+    "process.env": process.env,
+  },
   optimizeDeps: {
     exclude: ["lucide-react"],
   },

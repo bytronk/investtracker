@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "../types";
-import { toast, ToastOptions } from "react-toastify"; // Importar Toastify
-import "react-toastify/dist/ReactToastify.css"; // Estilos de Toastify
-import { useTheme } from "./ThemeContext"; // Importar el contexto de tema
+import { toast, ToastOptions } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "./ThemeContext";
 
 interface AuthContextType {
   user: User | null;
@@ -17,14 +17,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const { isDarkMode } = useTheme(); // Usar el estado del tema
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const { isDarkMode } = useTheme();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const toastStyle: ToastOptions = {
     position: "bottom-center",
@@ -43,9 +37,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   };
 
+  useEffect(() => {
+    // Verificar si hay un usuario almacenado en localStorage
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);  // Si hay un usuario en localStorage, cargarlo en el estado
+    }
+  }, []); // Solo ejecutar una vez cuando el componente se monta
+
   const validateFields = (email: string, password: string) => {
     if (!email) {
-      toast.error("El campo de correo electrónico no puede estar vacío.", toastStyle);
+      toast.error(
+        "El campo de correo electrónico no puede estar vacío.",
+        toastStyle
+      );
       return false;
     }
     if (!password) {
@@ -55,52 +61,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return true;
   };
 
-  const login = (email: string, password: string, remember: boolean) => {
+  const register = async (email: string, password: string) => {
     if (!validateFields(email, password)) return;
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (!users[email]) {
-      toast.error("El usuario no existe. Por favor, regístrate primero.", toastStyle);
-      return;
-    }
-    if (users[email].password !== password) {
-      toast.error("Contraseña incorrecta.", toastStyle);
-      return;
-    }
+    try {
+      const response = await fetch(`${backendUrl}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const currentUser = { id: users[email].id, email };
-    setUser(currentUser);
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message || "Error al registrar el usuario.");
+      }
 
-    if (remember) {
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      const newUser = await response.json();
+      setUser({ id: newUser.id.toString(), email: newUser.email });
+      localStorage.setItem("currentUser", JSON.stringify(newUser));
+      toast.success("Registro exitoso.", toastStyle);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error desconocido.",
+        toastStyle
+      );
     }
-    toast.success("Inicio de sesión.", toastStyle);
   };
 
-  const register = (email: string, password: string) => {
+  const login = async (email: string, password: string, remember: boolean) => {
     if (!validateFields(email, password)) return;
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (users[email]) {
-      toast.error("El usuario ya está registrado.", toastStyle);
-      return;
+    try {
+      const response = await fetch(`${backendUrl}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const { message } = await response.json();
+        throw new Error(message || "Error al iniciar sesión.");
+      }
+
+      const loggedUser = await response.json();
+      const currentUser = {
+        id: loggedUser.id.toString(),
+        email: loggedUser.email,
+      };
+
+      setUser(currentUser);
+      if (remember)
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      toast.success("Inicio de sesión exitoso.", toastStyle);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error desconocido.",
+        toastStyle
+      );
     }
-
-    const newUser = { id: Date.now().toString(), password };
-    users[email] = newUser;
-    localStorage.setItem("users", JSON.stringify(users));
-
-    const currentUser = { id: newUser.id, email };
-    setUser(currentUser);
-    localStorage.setItem("currentUser", JSON.stringify(currentUser));
-    toast.success("Registro exitoso.", toastStyle);
-    toast.success("Inicio de sesión.", toastStyle);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("currentUser");
-    toast.warn("Se ha cerrado la sesión.", toastStyle); // Usar el estilo dinámico
+    toast.warn("Se ha cerrado la sesión.", toastStyle);
   };
 
   return (
