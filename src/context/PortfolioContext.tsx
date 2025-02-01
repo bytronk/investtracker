@@ -1,7 +1,9 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext, useMemo } from "react";
 import { Portfolio, Transaction } from "../types";
 import { useAuth } from "./AuthContext";
 import { cryptoAssets, stockAssets } from "../data/assets";
+import { toast, ToastOptions } from "react-toastify";
+import { useTheme } from "./ThemeContext";
 
 interface PortfolioContextType {
   portfolio: Portfolio;
@@ -9,11 +11,12 @@ interface PortfolioContextType {
     symbol: string,
     amount: number,
     type: "crypto" | "stock",
-    isLoss?: boolean, // Parámetro opcional para manejar pérdidas
-    forceDelete?: boolean // Parámetro opcional para forzar eliminación
+    isLoss?: boolean,
+    forceDelete?: boolean
   ) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => void;
+  updateSavingsAccount: (newTotal: number) => void;
 }
 
 const PortfolioContext = createContext<PortfolioContextType | null>(null);
@@ -22,28 +25,75 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const [portfolio, setPortfolio] = useState<Portfolio>({
     assets: [],
     transactions: [],
     savingsAccount: 0,
   });
 
+  // Memoizar los estilos de los toast para evitar re-renders innecesarios
+  const toastStyle: ToastOptions = useMemo(
+    () => ({
+      position: "bottom-center",
+      autoClose: 2500,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      style: {
+        bottom: "25px",
+        margin: "0 auto",
+        borderRadius: "3px",
+        width: "92%",
+        backgroundColor: isDarkMode ? "rgba(10, 12, 16)" : "rgba(251, 252, 252)",
+        color: isDarkMode ? "#f3f4f6" : "#1f2937",
+        border: isDarkMode ? "1px solid rgba(20, 24, 28)" : "none",
+      },
+    }),
+    [isDarkMode] // Se actualiza solo cuando cambia el modo oscuro
+  );
+
+  // Cargar datos del portfolio desde la API
   useEffect(() => {
     if (user) {
-      const storedPortfolio = localStorage.getItem(`portfolio_${user.id}`);
-      if (storedPortfolio) {
-        setPortfolio(JSON.parse(storedPortfolio));
-      }
-    }
-  }, [user]);
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/portfolio/${user.portfolio_id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data || typeof data.savings_account?.total === "undefined") {
+            toast.error("Error al cargar el Efectivo Disponible.", toastStyle);
+            return;
+          }
 
-  const savePortfolio = (newPortfolio: Portfolio) => {
+          setPortfolio({
+            assets: data.assets || [],
+            transactions: data.transactions || [],
+            savingsAccount: Number(data.savings_account.total) || 0,
+          });
+        })
+        .catch(() =>
+          toast.error("Error al cargar el Portfolio. Inténtalo de nuevo más tarde.", toastStyle)
+        );
+    }
+  }, [user, toastStyle]);
+
+  // Actualizar savings_account en la base de datos y en el estado local
+  const updateSavingsAccount = (newTotal: number) => {
     if (user) {
-      localStorage.setItem(
-        `portfolio_${user.id}`,
-        JSON.stringify(newPortfolio)
-      );
-      setPortfolio(newPortfolio);
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/savings_account/${user.portfolio_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ total: newTotal }),
+      })
+        .then((res) => res.json())
+        .then((updatedData) => {
+          setPortfolio((prev) => ({
+            ...prev,
+            savingsAccount: Number(updatedData.total) || prev.savingsAccount,
+          }));
+        })
+        .catch(() =>
+          toast.error("Error al actualizar Efectivo Disponible.", toastStyle)
+        );
     }
   };
 
@@ -54,9 +104,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     if (stockAssets.some((asset) => asset.id === assetId)) {
       return "stock";
     }
-    throw new Error(
-      `Asset ID "${assetId}" no pertenece a ningún tipo conocido.`
-    );
+    throw new Error(`Asset ID "${assetId}" no pertenece a ningún tipo conocido.`);
   };
 
   const updateAsset = (
@@ -69,29 +117,28 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
     const assetIndex = portfolio.assets.findIndex(
       (asset) => asset.symbol === symbol && asset.type === type
     );
-  
+
     if (assetIndex !== -1) {
       const currentAsset = portfolio.assets[assetIndex];
       let newRealizedProfit = currentAsset.realizedProfit ?? 0;
-  
+
       if (forceDelete) {
-        portfolio.assets.splice(assetIndex, 1); // Eliminar activo forzado
+        portfolio.assets.splice(assetIndex, 1);
       } else if (isLoss) {
-        // Declarar pérdida
         newRealizedProfit -= currentAsset.totalInvested;
         portfolio.assets[assetIndex] = {
           ...currentAsset,
           totalInvested: 0,
           realizedProfit: newRealizedProfit,
         };
-  
+
         if (newRealizedProfit === 0) {
-          portfolio.assets.splice(assetIndex, 1); // Eliminar si realizedProfit queda en 0
+          portfolio.assets.splice(assetIndex, 1);
         }
       } else {
         const newTotalInvested = currentAsset.totalInvested + amount;
         newRealizedProfit += Math.abs(Math.min(newTotalInvested, 0));
-  
+
         if (newTotalInvested <= 0 && newRealizedProfit === 0) {
           portfolio.assets.splice(assetIndex, 1);
         } else {
@@ -103,14 +150,13 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
     } else {
-      // Si el activo no existe en la lista
       if (amount < 0) {
         portfolio.assets.push({
           id: Date.now().toString(),
           symbol,
           type,
           totalInvested: 0,
-          realizedProfit: Math.abs(amount), // Registrar como realizedProfit
+          realizedProfit: Math.abs(amount),
         });
       } else {
         portfolio.assets.push({
@@ -122,10 +168,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       }
     }
-  
-    savePortfolio({ ...portfolio });
+
+    setPortfolio({ ...portfolio });
   };
-  
 
   const addTransaction = (transaction: Omit<Transaction, "id">) => {
     const newTransaction = {
@@ -153,12 +198,15 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       newSavingsAccount -= transaction.amount;
     }
 
+    updateSavingsAccount(newSavingsAccount);
+
     const newPortfolio = {
       ...portfolio,
       transactions: [newTransaction, ...portfolio.transactions],
       savingsAccount: newSavingsAccount,
     };
-    savePortfolio(newPortfolio);
+
+    setPortfolio(newPortfolio);
   };
 
   const deleteTransaction = (id: string) => {
@@ -169,62 +217,21 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
 
     let newSavingsAccount = portfolio.savingsAccount;
 
-    if (
-      ["ingreso", "interes", "dividendo"].includes(transactionToDelete.type)
-    ) {
+    if (["ingreso", "interes", "dividendo"].includes(transactionToDelete.type)) {
       newSavingsAccount -= transactionToDelete.amount;
     } else if (transactionToDelete.type === "retiro") {
       newSavingsAccount += transactionToDelete.amount;
     } else if (transactionToDelete.type === "compra") {
       newSavingsAccount += transactionToDelete.amount;
       const assetType = determineAssetType(transactionToDelete.assetId || "");
-      updateAsset(
-        transactionToDelete.assetId || "",
-        -transactionToDelete.amount,
-        assetType
-      );
+      updateAsset(transactionToDelete.assetId || "", -transactionToDelete.amount, assetType);
     } else if (transactionToDelete.type === "venta") {
       newSavingsAccount -= transactionToDelete.amount;
       const assetType = determineAssetType(transactionToDelete.assetId || "");
-      const assetIndex = portfolio.assets.findIndex(
-        (asset) =>
-          asset.symbol === transactionToDelete.assetId &&
-          asset.type === assetType
-      );
-
-      if (assetIndex !== -1) {
-        const currentAsset = portfolio.assets[assetIndex];
-        const adjustedProfit =
-          (currentAsset.realizedProfit ?? 0) - transactionToDelete.amount;
-
-        if (adjustedProfit <= 0) {
-          const restoredAmount = Math.abs(adjustedProfit);
-          portfolio.assets[assetIndex] = {
-            ...currentAsset,
-            totalInvested: currentAsset.totalInvested + restoredAmount,
-            realizedProfit: 0,
-          };
-
-          if (portfolio.assets[assetIndex].totalInvested <= 0) {
-            portfolio.assets.splice(assetIndex, 1);
-          }
-        } else {
-          portfolio.assets[assetIndex] = {
-            ...currentAsset,
-            realizedProfit: adjustedProfit,
-          };
-        }
-      } else if (transactionToDelete.type === "venta") {
-        const restoredType = determineAssetType(transactionToDelete.assetId!);
-        portfolio.assets.push({
-          id: Date.now().toString(),
-          symbol: transactionToDelete.assetId!,
-          type: restoredType,
-          totalInvested: transactionToDelete.amount,
-          realizedProfit: 0,
-        });
-      }
+      updateAsset(transactionToDelete.assetId || "", transactionToDelete.amount, assetType);
     }
+
+    updateSavingsAccount(newSavingsAccount);
 
     const updatedTransactions = portfolio.transactions.filter(
       (transaction) => transaction.id !== id
@@ -235,18 +242,12 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({
       transactions: updatedTransactions,
       savingsAccount: newSavingsAccount,
     };
-    savePortfolio(newPortfolio);
+
+    setPortfolio(newPortfolio);
   };
 
   return (
-    <PortfolioContext.Provider
-      value={{
-        portfolio,
-        updateAsset,
-        addTransaction,
-        deleteTransaction,
-      }}
-    >
+    <PortfolioContext.Provider value={{ portfolio, updateAsset, addTransaction, deleteTransaction, updateSavingsAccount }}>
       {children}
     </PortfolioContext.Provider>
   );

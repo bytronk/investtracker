@@ -3,6 +3,7 @@ export interface User {
   id: string; // ID único del usuario
   email: string; // Correo electrónico del usuario
   password?: string; // Contraseña (opcional para evitar almacenar en ciertos contextos)
+  portfolio_id: string; // ID del portafolio asociado al usuario
 }
 
 // Representa un activo en la cartera

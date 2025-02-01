@@ -38,20 +38,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    // Verificar si hay un usuario almacenado en localStorage
+    // Restaurar usuario desde localStorage al cargar
     const storedUser = localStorage.getItem("currentUser");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);  // Si hay un usuario en localStorage, cargarlo en el estado
+      setUser(parsedUser);
     }
-  }, []); // Solo ejecutar una vez cuando el componente se monta
+  }, []);
 
   const validateFields = (email: string, password: string) => {
     if (!email) {
-      toast.error(
-        "El campo de correo electrónico no puede estar vacío.",
-        toastStyle
-      );
+      toast.error("El campo de correo electrónico no puede estar vacío.", toastStyle);
       return false;
     }
     if (!password) {
@@ -77,14 +74,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const newUser = await response.json();
-      setUser({ id: newUser.id.toString(), email: newUser.email });
-      localStorage.setItem("currentUser", JSON.stringify(newUser));
+      const currentUser: User = {
+        id: newUser.id.toString(),
+        email: newUser.email,
+        portfolio_id: newUser.portfolio_id.toString(),
+      };
+
+      setUser(currentUser);
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
       toast.success("Registro exitoso.", toastStyle);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Error desconocido.",
-        toastStyle
-      );
+      toast.error(error instanceof Error ? error.message : "Error desconocido.", toastStyle);
     }
   };
 
@@ -104,20 +104,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const loggedUser = await response.json();
-      const currentUser = {
+      const currentUser: User = {
         id: loggedUser.id.toString(),
         email: loggedUser.email,
+        portfolio_id: loggedUser.portfolio_id.toString(),
       };
 
       setUser(currentUser);
-      if (remember)
+      if (remember) {
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      }
+
       toast.success("Inicio de sesión exitoso.", toastStyle);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Error desconocido.",
-        toastStyle
-      );
+      toast.error(error instanceof Error ? error.message : "Error desconocido.", toastStyle);
     }
   };
 

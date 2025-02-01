@@ -7,39 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model portfolio {
+  id              BigInt       @id @default(autoincrement()) 
+  user_id         BigInt       @unique
+  name            String?      
+  users           users        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  assets          assets[]
+  transactions    transactions[]
+  savings_account savings_account?
+}
+
 model assets {
-  id              BigInt         @id @default(autoincrement()) // ID único generado automáticamente
-  user_id         BigInt
-  symbol          String         @db.VarChar(50)
-  type            String         @db.VarChar(10)
-  total_invested  Decimal        @db.Decimal(15, 2)
-  realized_profit Decimal?       @default(0) @db.Decimal(15, 2)
-  users           users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id              BigInt       @id @default(autoincrement())
+  portfolio_id    BigInt
+  symbol          String
+  type            String
+  total_invested  Decimal
+  realized_profit Decimal? @default(0)
+  portfolio       portfolio    @relation(fields: [portfolio_id], references: [id], onDelete: Cascade)
   transactions    transactions[]
 }
 
 model savings_account {
-  user_id BigInt  @id // Relacionado directamente con el usuario
-  total   Decimal @default(0) @db.Decimal(15, 2)
-  users   users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  portfolio_id BigInt @id
+  total        Decimal @default(0)
+  portfolio    portfolio @relation(fields: [portfolio_id], references: [id], onDelete: Cascade)
 }
 
 model transactions {
-  id       BigInt   @id @default(autoincrement()) // ID único generado automáticamente
-  user_id  BigInt
-  asset_id BigInt?
-  date     DateTime @db.Date
-  type     String   @db.VarChar(10)
-  amount   Decimal  @db.Decimal(15, 2)
-  assets   assets?  @relation(fields: [asset_id], references: [id], onDelete: Cascade)
-  users    users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id          BigInt       @id @default(autoincrement())
+  portfolio_id BigInt
+  asset_id    BigInt?
+  date        DateTime
+  type        String
+  amount      Decimal
+  portfolio   portfolio @relation(fields: [portfolio_id], references: [id], onDelete: Cascade)
+  asset       assets?   @relation(fields: [asset_id], references: [id], onDelete: Cascade)
 }
 
 model users {
-  id              BigInt           @id @default(autoincrement()) // ID único generado automáticamente
-  email           String           @unique @db.VarChar(255)
-  password        String           @db.VarChar(255)
-  assets          assets[]
-  savings_account savings_account?
-  transactions    transactions[]
+  id              BigInt           @id @default(autoincrement())
+  email           String           @unique
+  password        String
+  portfolio       portfolio?
 }

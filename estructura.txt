@@ -10,15 +10,10 @@
 │   ├── prisma
 │   │   ├── migrations
 │   │   │   ├── 20250123200440_add_autoincrement_to_users
+│   │   │   ├── 20250129101400_add_portfolio_table
 │   │   │   └── migration_lock.toml
 │   │   └── schema.prisma
 │   └── server.js
-├── dist
-│   ├── _redirects
-│   ├── assets
-│   │   ├── index-BsvAOVVT.css
-│   │   └── index-CImt1M6P.js
-│   └── index.html
 ├── eslint.config.js
 ├── estructura.txt
 ├── index.html
@@ -60,4 +55,4 @@
 ├── tsconfig.node.json
 └── vite.config.ts
 
-13 directories, 48 files
+12 directories, 44 files
